@@ -9,6 +9,7 @@ import '@fontsource/roboto/700.css';
 import { ThemeProvider } from "@mui/material";
 import { theme } from "../styles/theme";
 import { Navbar } from "../components/Navbar";
+import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ function NextWeb3App({ Component, pageProps }: AppProps) {
         <ThemeProvider theme={theme}>
           <Navbar />
           <Component {...pageProps} />
+          <Analytics />
         </ThemeProvider>
       </QueryClientProvider>
     </Web3ReactProvider>

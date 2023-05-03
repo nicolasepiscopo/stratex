@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { Button } from "@mui/material";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { injected } from "../connectors";
+import { useRouter } from "next/router";
 
 interface ConnectButtonProps {
   title?: string;
@@ -17,6 +18,7 @@ export function ConnectButton ({ title }: ConnectButtonProps) {
     startOnboarding,
     stopOnboarding
   } = useMetaMaskOnboarding();
+  const router = useRouter();
 
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
@@ -38,7 +40,9 @@ export function ConnectButton ({ title }: ConnectButtonProps) {
           onClick={() => {
             setConnecting(true);
 
-            activate(injected, undefined, true).catch((error) => {
+            activate(injected, undefined, true).then(() => {
+              router.push("/app");
+            }).catch((error) => {
               // ignore the error if it's a user rejected request
               if (error instanceof UserRejectedRequestError) {
                 setConnecting(false);

@@ -1,14 +1,16 @@
 import { Menu as MenuIcon } from "@mui/icons-material";
-import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AppBar, Box, Button, ButtonBase, Container, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from "@mui/material";
 import Image from "next/image";
 import { useState } from "react";
 import Account from "./Account";
 import { useWeb3React } from "@web3-react/core";
+import { useRouter } from "next/router";
 
 const pages = ['Products', 'Pricing', 'Blog'];
 
 export function Navbar () {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const router = useRouter();
 
   const { account } =
     useWeb3React();
@@ -28,14 +30,18 @@ export function Navbar () {
     width={48}
     height={48}
   />;
+  
+  const handleOnClickLogo = () => {
+    router.push('/')
+  }
 
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ justifyContent: 'space-between'}}>
-          <Box sx={{ display: { md: 'flex', xs: 'none' }, mr: 1 }}>
+          <ButtonBase onClick={handleOnClickLogo} sx={{ display: { md: 'flex', xs: 'none' }, mr: 1, borderRadius: '50%' }}>
             {logo}
-          </Box>
+          </ButtonBase>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"

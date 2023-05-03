@@ -32,7 +32,8 @@ export function SwapBotWidget () {
   const amount = (Number(amountToSwap) * selectedTokenPrice).toFixed(4);
   const balance = balanceData ? balanceData.toNumber()/10**18 : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
-  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && Number(amountToSwap) <= balance;
+  const insufficientBalance = balance < Number(amountToSwap);
+  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance;
 
   useEffect(() => {
     setLowerRange(
@@ -123,6 +124,7 @@ export function SwapBotWidget () {
           {isEmptyOrZero(amountToSwap) && 'Enter Amount'}
           {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
           {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
+          {insufficientBalance && 'Insufficient Balance'}
           {isSubmitEnabled && 'Create UniBot Now'}
         </Button>}
       </Stack>

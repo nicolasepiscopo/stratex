@@ -1,16 +1,10 @@
 import { useWeb3React } from "@web3-react/core";
 import Head from "next/head";
-import { Box, Container, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, Container, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import { SwapBotWidget } from "../modules/swap-bot-widget";
 import { ConnectButton } from "../components/ConnectButton";
 import { Bot, BotList } from "../modules/bot-list";
-
-const DAI_TOKEN_ADDRESS = "0x6b175474e89094c44da98b954eedeac495271d0f";
-
-const TOKENS = [
-  ''
-]
 
 function Home() {
   const { account, library } = useWeb3React();
@@ -52,7 +46,7 @@ function Home() {
                 title="start making money"
               />
             </Box>
-            <Paper sx={{
+            <Box sx={{
               width: '70%',
               margin: 'auto',
             }}>
@@ -63,7 +57,7 @@ function Home() {
               }}>
                 Welcome to UniBot, the application that allows you to perform automated swaps with smart contracts using buy and sell limits on Uniswap. With UniBot, you can make the most of your trades and get the best results quickly and easily. Our intuitive and user-friendly interface allows you to set your own buy and sell limits to get the best possible price.
               </Typography>
-            </Paper>
+            </Box>
           </Stack>
         )}
       </Container>

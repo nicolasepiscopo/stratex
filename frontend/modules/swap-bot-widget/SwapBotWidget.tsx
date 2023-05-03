@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTokenPrice } from "../../hooks/useTokenPrice";
 import { TokenSelectorModal } from "../token-selector-modal";
 import { ETHEREUM_TOKEN, Token } from "../token-selector-modal/TokenSelectorModal.helpers";
+import { isEmptyOrZero } from "../../utils/is-empty";
 
 export function SwapBotWidget () {
   const { account } = useWeb3React<Web3Provider>();
@@ -31,7 +32,7 @@ export function SwapBotWidget () {
   const amount = (Number(amountToSwap) * selectedTokenPrice).toFixed(4);
   const balance = balanceData ? balanceData.toNumber()/10**18 : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
-  const isSubmitEnabled = !!selectedTargetToken && amountToSwap !== '0' && !!lowerRange && !!upperRange && Number(amountToSwap) <= balance;
+  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && Number(amountToSwap) <= balance;
 
   useEffect(() => {
     setLowerRange(
@@ -119,9 +120,9 @@ export function SwapBotWidget () {
           <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
         </Stack>}
         {selectedTargetToken && <Button size="large" variant="contained" color="primary" disabled={!isSubmitEnabled}>
-          {amountToSwap === '0' && 'Enter Amount'}
-          {amountToSwap !== '0' && !selectedTargetToken && 'Select Target Token'}
-          {amountToSwap !== '0' && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
+          {isEmptyOrZero(amountToSwap) && 'Enter Amount'}
+          {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
+          {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
           {isSubmitEnabled && 'Create UniBot Now'}
         </Button>}
       </Stack>

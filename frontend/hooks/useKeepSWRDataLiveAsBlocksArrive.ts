@@ -9,7 +9,7 @@ export default function useKeepSWRDataLiveAsBlocksArrive(
 
   useEffect(() => {
     mutateRef.current = mutate;
-  });
+  }, [mutate]);
 
   // then, whenever a new block arrives, trigger a mutation
   const { data } = useBlockNumber();

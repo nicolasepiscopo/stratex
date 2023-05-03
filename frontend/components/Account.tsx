@@ -1,34 +1,17 @@
 import { useWeb3React } from "@web3-react/core";
-import { UserRejectedRequestError } from "@web3-react/injected-connector";
-import { useEffect, useState } from "react";
-import { injected } from "../connectors";
+import { useState } from "react";
 import useENSName from "../hooks/useENSName";
-import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
-import { formatEtherscanLink, shortenHex } from "../util";
+import { shortenHex } from "../util";
+import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
+import useEagerConnect from "../hooks/useEagerConnect";
+import { Box, Button, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import { ConnectButton } from "./ConnectButton";
 
-type AccountProps = {
-  triedToEagerConnect: boolean;
-};
-
-const Account = ({ triedToEagerConnect }: AccountProps) => {
-  const { active, error, activate, chainId, account, setError } =
+const Account = () => {
+  const triedToEagerConnect = useEagerConnect();
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const { error, account, deactivate } =
     useWeb3React();
-
-  const {
-    isMetaMaskInstalled,
-    isWeb3Available,
-    startOnboarding,
-    stopOnboarding,
-  } = useMetaMaskOnboarding();
-
-  // manage connecting state for injected connector
-  const [connecting, setConnecting] = useState(false);
-  useEffect(() => {
-    if (active || error) {
-      setConnecting(false);
-      stopOnboarding();
-    }
-  }, [active, error, stopOnboarding]);
 
   const ENSName = useENSName(account);
 
@@ -42,42 +25,59 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
 
   if (typeof account !== "string") {
     return (
-      <div>
-        {isWeb3Available ? (
-          <button
-            disabled={connecting}
-            onClick={() => {
-              setConnecting(true);
-
-              activate(injected, undefined, true).catch((error) => {
-                // ignore the error if it's a user rejected request
-                if (error instanceof UserRejectedRequestError) {
-                  setConnecting(false);
-                } else {
-                  setError(error);
-                }
-              });
-            }}
-          >
-            {isMetaMaskInstalled ? "Connect to MetaMask" : "Connect to Wallet"}
-          </button>
-        ) : (
-          <button onClick={startOnboarding}>Install Metamask</button>
-        )}
-      </div>
+      <>
+        <Box sx={{ display: { md: 'flex', xs: 'none' } }}>
+          <ConnectButton />
+        </Box>
+        <Box sx={{ display: { md: 'none', xs: 'flex' } }}>
+          <ConnectButton title="Connect" />
+        </Box>
+      </>
     );
   }
 
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   return (
-    <a
-      {...{
-        href: formatEtherscanLink("Account", [chainId, account]),
-        target: "_blank",
-        rel: "noopener noreferrer",
-      }}
-    >
-      {ENSName || `${shortenHex(account, 4)}`}
-    </a>
+    <>
+      <Tooltip title="Open settings">
+        <>
+          <Button size="small" color="inherit" startIcon={<Jazzicon diameter={32} seed={jsNumberForAddress(account)} />} onClick={handleOpenUserMenu} sx={{ display: { md: 'flex', xs: 'none' } }}>
+            {ENSName || `${shortenHex(account, 4)}`}
+          </Button>
+          <IconButton size="small" color="inherit" onClick={handleOpenUserMenu} sx={{ display: { md: 'none', xs: 'flex' } }}>
+            <Jazzicon diameter={32} seed={jsNumberForAddress(account)} />
+          </IconButton>
+        </>
+      </Tooltip>
+      {/* href: formatEtherscanLink("Account", [chainId, account]), */}
+      <Menu
+        sx={{ mt: '45px' }}
+        id="menu-appbar"
+        anchorEl={anchorElUser}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={Boolean(anchorElUser)}
+        onClose={handleCloseUserMenu}
+      >
+        <MenuItem onClick={deactivate}>
+          <Typography textAlign="center">Logout</Typography>
+        </MenuItem>
+      </Menu>
+    </>
   );
 };
 

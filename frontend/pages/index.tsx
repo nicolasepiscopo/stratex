@@ -1,63 +1,73 @@
 import { useWeb3React } from "@web3-react/core";
 import Head from "next/head";
-import Link from "next/link";
-import Account from "../components/Account";
-import ETHBalance from "../components/ETHBalance";
-import TokenBalance from "../components/TokenBalance";
-import useEagerConnect from "../hooks/useEagerConnect";
+import { Box, Container, Paper, Stack, TextField, Typography } from "@mui/material";
+import Image from "next/image";
+import { SwapBotWidget } from "../modules/swap-bot-widget";
+import { ConnectButton } from "../components/ConnectButton";
+import { Bot, BotList } from "../modules/bot-list";
 
 const DAI_TOKEN_ADDRESS = "0x6b175474e89094c44da98b954eedeac495271d0f";
 
+const TOKENS = [
+  ''
+]
+
 function Home() {
   const { account, library } = useWeb3React();
-
-  const triedToEagerConnect = useEagerConnect();
+  const bots: Bot[] = [];
 
   const isConnected = typeof account === "string" && !!library;
 
   return (
-    <div>
+    <Box>
       <Head>
-        <title>next-web3-boilerplate</title>
+        <title>UniBot</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <header>
-        <nav>
-          <Link href="/">next-web3-boilerplate</Link>
-
-          <Account triedToEagerConnect={triedToEagerConnect} />
-        </nav>
-      </header>
-
-      <main>
-        <h1>
-          Welcome to{" "}
-          <a href="https://github.com/mirshko/next-web3-boilerplate">
-            next-web3-boilerplate
-          </a>
-        </h1>
-
-        {isConnected && (
-          <section>
-            <ETHBalance />
-
-            <TokenBalance tokenAddress={DAI_TOKEN_ADDRESS} symbol="DAI" />
-          </section>
+      <Container maxWidth="xl">
+        {isConnected && !bots.length && (
+          <SwapBotWidget />
         )}
-      </main>
-
-      <style jsx>{`
-        nav {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        main {
-          text-align: center;
-        }
-      `}</style>
-    </div>
+        {isConnected && !!bots.length && (
+          <BotList bots={bots} />
+        )}
+        {!isConnected && (
+          <Stack justifyContent="space-between" alignItems="center" sx={{ height: '80vh'}}>
+            <Image 
+              alt="UniBot"
+              src="/logo.png"
+              width={200}
+              height={200}
+            />
+            <Box textAlign="center">
+              <Typography variant="h1" color="primary" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
+                UNIBOT
+              </Typography>
+              <Typography variant="h4" color="primary" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
+                The first decentralized trading bot powered by <strong>AWS</strong>, <strong>Chainlink</strong> and <strong>UniSwap</strong> protocol.
+              </Typography>
+            </Box>
+            <Box py={6}>
+              <ConnectButton 
+                title="start making money"
+              />
+            </Box>
+            <Paper sx={{
+              width: '70%',
+              margin: 'auto',
+            }}>
+              <Typography sx={{
+                opacity: .5,
+                color: 'white',
+                lineHeight: '2',
+              }}>
+                Welcome to UniBot, the application that allows you to perform automated swaps with smart contracts using buy and sell limits on Uniswap. With UniBot, you can make the most of your trades and get the best results quickly and easily. Our intuitive and user-friendly interface allows you to set your own buy and sell limits to get the best possible price.
+              </Typography>
+            </Paper>
+          </Stack>
+        )}
+      </Container>
+    </Box>
   );
 }
 

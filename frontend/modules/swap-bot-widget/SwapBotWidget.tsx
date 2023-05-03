@@ -31,7 +31,7 @@ export function SwapBotWidget () {
   const amount = (Number(amountToSwap) * selectedTokenPrice).toFixed(4);
   const balance = balanceData ? balanceData.toNumber()/10**18 : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
-  const isSubmitEnabled = !!selectedTargetToken && !!amountToSwap && !!lowerRange && !!upperRange && Number(amountToSwap) <= balance;
+  const isSubmitEnabled = !!selectedTargetToken && amountToSwap !== '0' && !!lowerRange && !!upperRange && Number(amountToSwap) <= balance;
 
   useEffect(() => {
     setLowerRange(

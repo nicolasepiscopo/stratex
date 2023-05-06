@@ -47,7 +47,7 @@ export function SwapBotWidget () {
   return (
     <Paper sx={{ my: 4, maxWidth: 500, width: '100%', mx: 'auto', p: 4 }}>
       <Stack spacing={2}>
-        <Typography variant="h5">
+        <Typography variant="h5" mb={2}>
           Create a UniBot
         </Typography>
         <TextField value={amountToSwap} onChange={(e) => setAmountToSwap(e.target.value ?? '0')} variant="outlined" label="Amount to Swap" InputProps={{
@@ -66,16 +66,14 @@ export function SwapBotWidget () {
               {selectedToken.symbol}
             </Button>
           )
-        }} 
-          helperText={(
-            <Stack direction="row" justifyContent="space-between">
-              {selectedTokenPriceLoading ? 
-                <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />
-              : <Typography>{!!amount && `$${amount}`}</Typography>}
-              <Typography sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {balance > 0 ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography>
-            </Stack>
-          )}
+        }}
         />
+        <Stack direction="row" justifyContent="space-between">
+          {selectedTokenPriceLoading ? 
+            <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />
+          : <Typography variant="caption">{!!amount && `$${amount}`}</Typography>}
+          <Typography variant="caption" sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {balance > 0 ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography>
+        </Stack>
         {selectedTargetToken && 
           <Stack spacing={1}>
             <Stack direction="row" spacing={2} alignItems="center">

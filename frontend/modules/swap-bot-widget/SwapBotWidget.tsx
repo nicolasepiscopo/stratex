@@ -1,5 +1,5 @@
 import type { Web3Provider } from "@ethersproject/providers";
-import { Box, Button, Divider, Paper, Skeleton, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, FormControl, MenuItem, Paper, Select, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import { useWeb3React } from "@web3-react/core";
 import useBalance from "../../hooks/useBalance";
 import { useEffect, useState } from "react";
@@ -18,6 +18,8 @@ export function SwapBotWidget () {
   const [amountToSwap, setAmountToSwap] = useState<string>('0');
   const [lowerRange, setLowerRange] = useState<string>();
   const [upperRange, setUpperRange] = useState<string>();
+  const [grids, setGrids] = useState<string>('2');
+  const [gridIsArithmetic, setGridIsArithmetic] = useState<boolean>(true);
   const {
     price: selectedTokenPrice,
     isLoading: selectedTokenPriceLoading,
@@ -114,10 +116,26 @@ export function SwapBotWidget () {
           </Button>
         }
         {selectedTargetToken && 
-        <Stack direction="row" spacing={1}>
-          <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => setLowerRange(e.target.value)} />
-          <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
-        </Stack>}
+        <>
+          <Stack direction="row" spacing={1}>
+            <TextField type="number" fullWidth variant="outlined" label="Grids" value={grids} onChange={(e) => setGrids(e.target.value)} />
+            <Select
+              value={gridIsArithmetic ? "arithmetic" : "geometric"}
+              onChange={(e) => setGridIsArithmetic(e.target.value === "arithmetic")}
+            >
+              <MenuItem value="arithmetic">
+                Arithmetic
+              </MenuItem>
+              <MenuItem value="geometric">
+                Geometric
+              </MenuItem>
+            </Select>
+          </Stack>
+          <Stack direction="row" spacing={1}>
+            <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => setLowerRange(e.target.value)} />
+            <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
+          </Stack>
+        </>}
         {selectedTargetToken && <Button size="large" variant="contained" color="primary" disabled={!isSubmitEnabled}>
           {isEmptyOrZero(amountToSwap) && 'Enter Amount'}
           {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}

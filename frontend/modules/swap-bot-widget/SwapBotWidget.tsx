@@ -1,5 +1,5 @@
 import type { Web3Provider } from "@ethersproject/providers";
-import { Box, Button, Divider, FormControl, MenuItem, Paper, Select, Skeleton, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, FormControl, MenuItem, Paper, Select, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import { useWeb3React } from "@web3-react/core";
 import useBalance from "../../hooks/useBalance";
 import { useEffect, useState } from "react";
@@ -47,7 +47,7 @@ export function SwapBotWidget () {
   }, [selectedTargetTokenPrice])
   
   return (
-    <Paper sx={{ my: 4, maxWidth: 500, width: '100%', mx: 'auto', p: 4 }}>
+    <Card variant="outlined" sx={{ my: 4, maxWidth: 500, width: '100%', mx: 'auto', p: 4 }}>
       <Stack spacing={2}>
         <Typography variant="h5" mb={2}>
           Create a UniBot
@@ -111,7 +111,7 @@ export function SwapBotWidget () {
           </Stack>
         }
         {!selectedTargetToken && 
-          <Button variant="contained" color="primary" onClick={() => setSelectedTargetTokenModalOpen(true)}>
+          <Button variant="outlined" color="primary" onClick={() => setSelectedTargetTokenModalOpen(true)}>
             Select Target Token for Swap
           </Button>
         }
@@ -136,7 +136,7 @@ export function SwapBotWidget () {
             <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
           </Stack>
         </>}
-        {selectedTargetToken && <Button size="large" variant="contained" color="primary" disabled={!isSubmitEnabled}>
+        {selectedTargetToken && <Button size="large" variant="outlined" color="primary" disabled={!isSubmitEnabled}>
           {isEmptyOrZero(amountToSwap) && 'Enter Amount'}
           {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
           {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
@@ -160,6 +160,6 @@ export function SwapBotWidget () {
         }}
         selectedValue={selectedTargetToken}
       />
-    </Paper>
+    </Card>
   );
 }

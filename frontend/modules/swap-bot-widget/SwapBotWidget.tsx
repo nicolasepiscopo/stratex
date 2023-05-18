@@ -1,5 +1,5 @@
 import type { Web3Provider } from "@ethersproject/providers";
-import { Box, Button, Divider, Paper, Skeleton, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, FormControl, MenuItem, Paper, Select, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import { useWeb3React } from "@web3-react/core";
 import useBalance from "../../hooks/useBalance";
 import { useEffect, useState } from "react";
@@ -18,6 +18,8 @@ export function SwapBotWidget () {
   const [amountToSwap, setAmountToSwap] = useState<string>('0');
   const [lowerRange, setLowerRange] = useState<string>();
   const [upperRange, setUpperRange] = useState<string>();
+  const [grids, setGrids] = useState<string>('2');
+  const [gridIsArithmetic, setGridIsArithmetic] = useState<boolean>(true);
   const {
     price: selectedTokenPrice,
     isLoading: selectedTokenPriceLoading,
@@ -45,9 +47,9 @@ export function SwapBotWidget () {
   }, [selectedTargetTokenPrice])
   
   return (
-    <Paper sx={{ my: 4, maxWidth: 500, width: '100%', mx: 'auto', p: 4 }}>
+    <Card variant="outlined" sx={{ my: 4, maxWidth: 500, width: '100%', mx: 'auto', p: 4 }}>
       <Stack spacing={2}>
-        <Typography variant="h5">
+        <Typography variant="h5" mb={2}>
           Create a UniBot
         </Typography>
         <TextField value={amountToSwap} onChange={(e) => setAmountToSwap(e.target.value ?? '0')} variant="outlined" label="Amount to Swap" InputProps={{
@@ -66,16 +68,14 @@ export function SwapBotWidget () {
               {selectedToken.symbol}
             </Button>
           )
-        }} 
-          helperText={(
-            <Stack direction="row" justifyContent="space-between">
-              {selectedTokenPriceLoading ? 
-                <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />
-              : <Typography>{!!amount && `$${amount}`}</Typography>}
-              <Typography sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {balance > 0 ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography>
-            </Stack>
-          )}
+        }}
         />
+        <Stack direction="row" justifyContent="space-between">
+          {selectedTokenPriceLoading ? 
+            <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />
+          : <Typography variant="caption">{!!amount && `$${amount}`}</Typography>}
+          <Typography variant="caption" sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {balance > 0 ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography>
+        </Stack>
         {selectedTargetToken && 
           <Stack spacing={1}>
             <Stack direction="row" spacing={2} alignItems="center">
@@ -111,16 +111,32 @@ export function SwapBotWidget () {
           </Stack>
         }
         {!selectedTargetToken && 
-          <Button variant="contained" color="primary" onClick={() => setSelectedTargetTokenModalOpen(true)}>
+          <Button variant="outlined" color="primary" onClick={() => setSelectedTargetTokenModalOpen(true)}>
             Select Target Token for Swap
           </Button>
         }
         {selectedTargetToken && 
-        <Stack direction="row" spacing={1}>
-          <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => setLowerRange(e.target.value)} />
-          <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
-        </Stack>}
-        {selectedTargetToken && <Button size="large" variant="contained" color="primary" disabled={!isSubmitEnabled}>
+        <>
+          <Stack direction="row" spacing={1}>
+            <TextField type="number" fullWidth variant="outlined" label="Grids" value={grids} onChange={(e) => setGrids(e.target.value)} />
+            <Select
+              value={gridIsArithmetic ? "arithmetic" : "geometric"}
+              onChange={(e) => setGridIsArithmetic(e.target.value === "arithmetic")}
+            >
+              <MenuItem value="arithmetic">
+                Arithmetic
+              </MenuItem>
+              <MenuItem value="geometric">
+                Geometric
+              </MenuItem>
+            </Select>
+          </Stack>
+          <Stack direction="row" spacing={1}>
+            <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => setLowerRange(e.target.value)} />
+            <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
+          </Stack>
+        </>}
+        {selectedTargetToken && <Button size="large" variant="outlined" color="primary" disabled={!isSubmitEnabled}>
           {isEmptyOrZero(amountToSwap) && 'Enter Amount'}
           {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
           {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
@@ -144,6 +160,6 @@ export function SwapBotWidget () {
         }}
         selectedValue={selectedTargetToken}
       />
-    </Paper>
+    </Card>
   );
 }

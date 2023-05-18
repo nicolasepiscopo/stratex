@@ -30,33 +30,42 @@ export function ConnectButton ({ title }: ConnectButtonProps) {
     }
   }, [active, error, stopOnboarding]);
 
+  let buttonTitle = 'Install Metamask';
+
+  if (title) {
+    buttonTitle = title;
+  } else if (isWeb3Available) {
+    buttonTitle = isMetaMaskInstalled ? 'Connect to MetaMask' : 'Connect to Wallet';
+  }
+
   return (
     <div>
-      {isWeb3Available ? (
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={connecting}
-          onClick={() => {
-            setConnecting(true);
+      <Button
+        variant="contained"
+        color="primary"
+        disabled={connecting}
+        onClick={() => {
+          if (!isWeb3Available) {
+            startOnboarding();
+            return;
+          }
+          
+          setConnecting(true);
 
-            activate(injected, undefined, true).then(() => {
-              router.push("/app");
-            }).catch((error) => {
-              // ignore the error if it's a user rejected request
-              if (error instanceof UserRejectedRequestError) {
-                setConnecting(false);
-              } else {
-                setError(error);
-              }
-            });
-          }}
-        >
-          {title ?? (isMetaMaskInstalled ? "Connect to MetaMask" : "Connect to Wallet")}
-        </Button>
-      ) : (
-        <Button color="inherit" onClick={startOnboarding}>Install Metamask</Button>
-      )}
+          activate(injected, undefined, true).then(() => {
+            router.push("/app");
+          }).catch((error) => {
+            // ignore the error if it's a user rejected request
+            if (error instanceof UserRejectedRequestError) {
+              setConnecting(false);
+            } else {
+              setError(error);
+            }
+          });
+        }}
+      >
+        {buttonTitle}
+      </Button>
     </div>
   );
 }

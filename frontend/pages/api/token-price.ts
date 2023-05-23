@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch from "isomorphic-fetch";
 
 /**
  * NextJS endpoint that retrieves latest token prices from CoinMarketCap

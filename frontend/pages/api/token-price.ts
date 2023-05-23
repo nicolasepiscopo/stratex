@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 /**
  * NextJS endpoint that retrieves latest token prices from CoinMarketCap
  */

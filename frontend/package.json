@@ -28,6 +28,7 @@
     "cryptocurrency-icons": "0.18.1",
     "lodash": "4.17.21",
     "next": "13.0.7",
+    "node-fetch": "3.3.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-jazzicon": "1.0.4",

@@ -1,13 +1,16 @@
-import { Box, Divider, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Chip, Divider, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import orderBy from "lodash/orderBy";
 
 export interface Event {
-  // TODO: define properly this event model
-  amountInvested: number;
-  amountReceived: number;
-  transactionFee: number;
-  tokenAddressFrom: string;
-  tokenAddressTo: string;
-  transactionHash: string;
+  id: string;
+  // Crypto currency symbol
+  symbol: string;
+  symbolImage: string;
+  orderType: 'buy' | 'sell';
+  quantity: number;
+  // The price at which the order was executed
+  tradePrice: number;
+  // The date at which the order was executed
   date: string;
 }
 
@@ -27,16 +30,16 @@ export function EventList ({ events }: BotListProps) {
         <TableHead>
           <TableRow>
             <TableCell>
-              Invested
+              Symbol
             </TableCell>
             <TableCell>
-              Received
+              Order Type
             </TableCell>
             <TableCell>
-              Fee
+              Qty
             </TableCell>
             <TableCell>
-              Transaction Hash
+              Trade Price
             </TableCell>
             <TableCell>
               Date
@@ -44,20 +47,33 @@ export function EventList ({ events }: BotListProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {events.map((event) => {
+          {orderBy(events, ['date'], ['desc']).map((event) => {
             return (
-              <TableRow key={event.transactionHash}>
+              <TableRow key={event.id}>
                 <TableCell>
-                  {event.amountInvested} WETH
+                  <Box
+                    aria-label={event.symbol}
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      backgroundImage: `url(${event.symbolImage})`,
+                      backgroundSize: 'cover',
+                    }}
+                  />
                 </TableCell>
                 <TableCell>
-                  {event.amountReceived} WMATIC
+                  <Chip 
+                    label={event.orderType.toUpperCase()}
+                    color="primary"
+                    variant="outlined"
+                  />
                 </TableCell>
                 <TableCell>
-                  {event.transactionFee} WETH
+                  {event.quantity}
                 </TableCell>
                 <TableCell>
-                  {event.transactionHash}
+                  {event.tradePrice}
                 </TableCell>
                 <TableCell>
                   {event.date}

@@ -30,5 +30,5 @@ export function useTokenList (): Token[] {
     }
   });
 
-  return [ETHEREUM_TOKEN,...data];
+  return data;
 }

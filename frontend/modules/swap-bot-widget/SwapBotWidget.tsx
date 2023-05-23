@@ -5,7 +5,7 @@ import useBalance from "../../hooks/useBalance";
 import { useEffect, useState } from "react";
 import { useTokenPrice } from "../../hooks/useTokenPrice";
 import { TokenSelectorModal } from "../token-selector-modal";
-import { ETHEREUM_TOKEN, Token } from "../token-selector-modal/TokenSelectorModal.helpers";
+import { ETHEREUM_TOKEN, Token, useTokenList } from "../token-selector-modal/TokenSelectorModal.helpers";
 import { isEmptyOrZero } from "../../utils/is-empty";
 import { ArrowBack } from "@mui/icons-material";
 
@@ -14,10 +14,11 @@ interface SwapBotWidgetProps {
 }
 
 export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
+  const tokens = useTokenList();
+  const wethToken = tokens.find(token => token.symbol === 'WETH'); 
   const { account } = useWeb3React<Web3Provider>();
-  const [selectedToken, setSelectedToken] = useState<Token>(ETHEREUM_TOKEN);
-  console.log(selectedToken);
-  const { data: balanceData } = useBalance(account, selectedToken.address);
+  const [selectedToken, setSelectedToken] = useState<Token>();
+  const { data: balanceData } = useBalance(account, selectedToken?.address);
   const [selectedTokenModalOpen, setSelectedTokenModalOpen] = useState<boolean>(false);
   const [selectedTargetToken, setSelectedTargetToken] = useState<Token | undefined>(undefined);
   const [selectedTargetTokenModalOpen, setSelectedTargetTokenModalOpen] = useState<boolean>(false);
@@ -35,13 +36,21 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
     isLoading: selectedTargetTokenPriceLoading,
   } = useTokenPrice(selectedTargetToken);
 
-  const selectedTokenImg = selectedToken.logoURI;
+  const selectedTokenImg = selectedToken?.logoURI;
   const selectedTargetTokenImg = selectedTargetToken?.logoURI;
   const amount = (Number(amountToSwap) * selectedTokenPrice).toFixed(4);
   const balance = balanceData ? balanceData.toNumber()/10**18 : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
   const insufficientBalance = balance < Number(amountToSwap);
   const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance;
+
+  const isLoading = !selectedToken;
+
+  useEffect(() => {
+    if (wethToken && !selectedToken) {
+      setSelectedToken(wethToken);
+    }
+  }, [selectedToken, wethToken])
 
   useEffect(() => {
     setLowerRange(
@@ -50,7 +59,9 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
     setUpperRange(
       selectedTargetTokenPrice ? (selectedTargetTokenPrice * 1.10).toFixed(4) : ''
     );
-  }, [selectedTargetTokenPrice])
+  }, [selectedTargetTokenPrice]);
+
+  if (isLoading) return null;
   
   return (
     <Box sx={{ maxWidth: 500, width: '100%', mx: 'auto', my: 4 }}>

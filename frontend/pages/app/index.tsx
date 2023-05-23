@@ -26,25 +26,43 @@ function App() {
         symbol: "WETH",
       },
       tokenPair: {
-        address: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+        address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
         chainId: 1,
-        decimals: 18,
-        logoURI: "https://assets.coingecko.com/coins/images/4713/thumb/matic-token-icon.png?1624446912",
-        name: "Polygon",
-        symbol: "MATIC",
+        decimals: 8,
+        logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
+        name: "Wrapped BTC",
+        symbol: "WBTC",
       },
     },
   ];
   const events: Event[] = [
     {
-      amountInvested: 1,
-      amountReceived: 2,
-      date: new Date().toISOString(),
-      tokenAddressFrom: '0x0',
-      tokenAddressTo: '0x0',
-      transactionFee: .0050,
-      transactionHash: '0x0'
-    }
+      id: '1',
+      date: new Date().toLocaleString(),
+      orderType: 'sell',
+      quantity: 10,
+      symbol: 'WETH',
+      symbolImage: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+      tradePrice: 1816.53,
+    },
+    {
+      id: '2',
+      date: new Date().toLocaleString(),
+      orderType: 'buy',
+      quantity: 0.67670,
+      symbol: 'WBTC',
+      symbolImage: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
+      tradePrice: 26843.80,
+    },
+    {
+      id: '3',
+      date: new Date().toLocaleString(),
+      orderType: 'buy',
+      quantity: 11,
+      symbol: 'WETH',
+      symbolImage: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+      tradePrice: 1760.00,
+    },
   ];
 
   const isConnected = typeof account === "string" && !!library;

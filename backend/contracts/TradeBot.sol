@@ -107,7 +107,7 @@ contract SingleSwap is AutomationCompatibleInterface {
                 }
             }
         }
-        if (upkeepNeeded) performData = abi.encode(performDataUnencoded, true);
+        if (upkeepNeeded) performData = abi.encode(performDataUnencoded);
         return (upkeepNeeded, performData); 
     }
 

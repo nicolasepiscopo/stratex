@@ -35,6 +35,7 @@ contract SingleSwap is AutomationCompatibleInterface {
         uint256 sellCounter;
         mapping(uint256 => uint256) boughtAmounts; // breachIndex => amount
         uint256 lastExecutionTime;
+        bool isCancelled;
     }
 
     struct User {
@@ -99,7 +100,7 @@ contract SingleSwap is AutomationCompatibleInterface {
         upkeepNeeded = false;
 
         for (uint256 i = 0; i < botsCount; i++) {
-            if (bots[i].grids.length > 0) {
+            if ((bots[i].grids.length > 0) && !bots[i].isCancelled) {
                 (bool _upkeepNeeded, uint256 breachIndex, bool isFirstBreach) = checkBots(i, price);
                 if (_upkeepNeeded) {
                     performDataUnencoded[i] = PerformData(i, breachIndex, isFirstBreach);
@@ -290,5 +291,17 @@ contract SingleSwap is AutomationCompatibleInterface {
         return convertedPrice;
     }
 
-    receive() payable external {}
+    // function to cancel bot execution
+    function cancel(uint256 botId) external {
+        Bot storage bot = bots[botId];
+        require(bot[botId].owner == msg.sender, "Sender should be owner of the bot");
+        bot.isCancelled = true;
+    }
+
+    // function to resume bot execution
+    function resume(uint256 botId) external {
+        Bot storage bot = bots[botId];
+        require(bot[botId].owner == msg.sender, "Sender should be owner of the bot");
+        bot.isCancelled = false;
+    }
 }

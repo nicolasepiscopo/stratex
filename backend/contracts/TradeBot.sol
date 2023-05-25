@@ -30,7 +30,6 @@ contract SingleSwap is AutomationCompatibleInterface {
         uint256[] grids;
         mapping(uint256 => bool) breachedGrids; // breachIndex => true/false
         uint256 breachCounter;
-        bool isFirstBreach;
         uint256 buyCounter;
         uint256 sellCounter;
         mapping(uint256 => uint256) boughtAmounts; // breachIndex => amount
@@ -145,13 +144,12 @@ contract SingleSwap is AutomationCompatibleInterface {
         // Check gas that this performUpKeep can consume to not to consume more than the gas limit
         // in that case the logic will be the same but we could have some proxy and manage the bots using
         // groups or batches 
-        PerformData[] memory performDataUnencoded = abi.decode(performData, (PerformData[]));
+        PerformData[] memory performDataDecoded = abi.decode(performData, (PerformData[]));
 
-        for (uint256 i = 0; i < performDataUnencoded.length; i++) {
-            PerformData memory performDataIndividual = performDataUnencoded[i];
+        for (uint256 i = 0; i < performDataDecoded.length; i++) {
+            PerformData memory performDataIndividual = performDataDecoded[i];
             Bot storage bot = bots[performDataIndividual.botId];
             User storage user = userData[bot.owner];
-            bot.isFirstBreach = performDataIndividual.isFirstBreach;
             uint256 breachIndex = performDataIndividual.breachIndex;
             if (performDataIndividual.isFirstBreach) { // This needs to fixed maybe add same sell code in else part 
                 bot.breachedGrids[breachIndex] = true;

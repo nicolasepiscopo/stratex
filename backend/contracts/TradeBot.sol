@@ -146,7 +146,7 @@ contract SingleSwap is AutomationCompatibleInterface {
         // groups or batches 
         PerformData[] memory performDataUnencoded = abi.decode(performData, (PerformData[]));
 
-        for (uint256 i; i < performDataUnencoded.length; i++) {
+        for (uint256 i = 0; i < performDataUnencoded.length; i++) {
             PerformData memory performDataIndividual = performDataUnencoded[i];
             Bot storage bot = bots[performDataIndividual.botId];
             User storage user = userData[bot.owner];

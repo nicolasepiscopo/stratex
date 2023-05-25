@@ -80,7 +80,7 @@ contract SingleSwap is AutomationCompatibleInterface {
         // breachCounter = 0;
     }
 
-    function createBot(uint256[] calldata _grids) public {
+    function createBot(uint256[] calldata _grids) external {
         require(
             userData[msg.sender].onboarded &&
             userData[msg.sender].balanceWMATIC > 0,
@@ -222,8 +222,7 @@ contract SingleSwap is AutomationCompatibleInterface {
        }
     }
 
-    function depositWmatic(uint256 amount) public payable {
-        require(msg.value == 0, "ETH not accepted");
+    function depositWmatic(uint256 amount) external {
         User storage user = userData[msg.sender];
         IERC20(WMATIC).transferFrom(msg.sender, address(this), amount);
         // check if sender exists, if not create and assign balance

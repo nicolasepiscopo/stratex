@@ -3,7 +3,7 @@ import { abi } from '../../artifacts/contracts/TradeBot.sol/SingleSwap.json'
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const address = '0x364492771fddd3eef9416ff78b287c472bc9ebb9';
+  const address = '0x42AF787924287dA64a74D095517d130EAE5cDac9';
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.ALCHEMY_RPC
   );

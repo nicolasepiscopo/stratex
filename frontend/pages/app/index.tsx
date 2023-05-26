@@ -10,30 +10,30 @@ function App() {
   const { account, library } = useWeb3React();
   const [isOpenSwapBotWidget, setIsOpenSwapBotWidget] = useState(false);
   const bots: Bot[] = [
-    {
-      id: '1',
-      amount: 10,
-      createdAt: new Date().toISOString(),
-      lowerRange: 90,
-      upperRange: 100,
-      grids: 4,
-      token: {
-        address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-        chainId: 1,
-        decimals: 18,
-        logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
-        name: "Wrapped Ether",
-        symbol: "WETH",
-      },
-      tokenPair: {
-        address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-        chainId: 1,
-        decimals: 8,
-        logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
-        name: "Wrapped BTC",
-        symbol: "WBTC",
-      },
-    },
+    // {
+    //   id: '1',
+    //   amount: 10,
+    //   createdAt: new Date().toISOString(),
+    //   lowerRange: 90,
+    //   upperRange: 100,
+    //   grids: 4,
+    //   token: {
+    //     address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    //     chainId: 1,
+    //     decimals: 18,
+    //     logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+    //     name: "Wrapped Ether",
+    //     symbol: "WETH",
+    //   },
+    //   tokenPair: {
+    //     address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    //     chainId: 1,
+    //     decimals: 8,
+    //     logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
+    //     name: "Wrapped BTC",
+    //     symbol: "WBTC",
+    //   },
+    // },
   ];
   const events: Event[] = [
     {
@@ -75,15 +75,15 @@ function App() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container maxWidth="xl">
-        {shouldShowSwapBotWidget && (
+        {/* {shouldShowSwapBotWidget && ( */}
           <SwapBotWidget onCancel={bots.length ? () => setIsOpenSwapBotWidget(false) : undefined} />
-        )}
-        {!shouldShowSwapBotWidget && (
+        {/* )} */}
+        {/* {!shouldShowSwapBotWidget && (
           <Stack direction="row" spacing={2} mt={3}>
             <BotList bots={bots} onCreateBot={() => setIsOpenSwapBotWidget(true)}/>
             <EventList events={events} />
           </Stack>
-        )}
+        )} */}
       </Container>
     </Box>
   );

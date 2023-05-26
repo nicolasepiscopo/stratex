@@ -8,6 +8,8 @@ import { TokenSelectorModal } from "../token-selector-modal";
 import { ETHEREUM_TOKEN, Token, useTokenList } from "../token-selector-modal/TokenSelectorModal.helpers";
 import { isEmptyOrZero } from "../../utils/is-empty";
 import { ArrowBack } from "@mui/icons-material";
+import { ethers } from "ethers";
+import { useCreateBot } from "./SwapBotWidget.helpers";
 
 interface SwapBotWidgetProps {
   onCancel?: () => void;
@@ -18,7 +20,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const wethToken = tokens.find(token => token.symbol === 'WETH'); 
   const { account } = useWeb3React<Web3Provider>();
   const [selectedToken, setSelectedToken] = useState<Token>();
-  const { data: balanceData } = useBalance(account, selectedToken?.address);
+  const balanceData = useBalance(account, selectedToken?.address);
   const [selectedTokenModalOpen, setSelectedTokenModalOpen] = useState<boolean>(false);
   const [selectedTargetToken, setSelectedTargetToken] = useState<Token | undefined>(undefined);
   const [selectedTargetTokenModalOpen, setSelectedTargetTokenModalOpen] = useState<boolean>(false);
@@ -35,13 +37,14 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
     price: selectedTargetTokenPrice,
     isLoading: selectedTargetTokenPriceLoading,
   } = useTokenPrice(selectedTargetToken);
+  const createBot = useCreateBot();
 
   const selectedTokenImg = selectedToken?.logoURI;
   const selectedTargetTokenImg = selectedTargetToken?.logoURI;
-  const amount = (Number(amountToSwap) * selectedTokenPrice).toFixed(4);
-  const balance = balanceData ? balanceData.toNumber()/10**18 : 0;
+  const amount = selectedTokenPrice ? Number(amountToSwap) * selectedTokenPrice : 0;
+  const balance = balanceData ? ethers.utils.formatEther(balanceData).toString() : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
-  const insufficientBalance = balance < Number(amountToSwap);
+  const insufficientBalance = balanceData && ethers.utils.parseEther(`0${amountToSwap}`).gt(balanceData);
   const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance;
 
   const isLoading = !selectedToken;
@@ -62,6 +65,20 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   }, [selectedTargetTokenPrice]);
 
   if (isLoading) return null;
+
+  const handleOnSubmit = async () => {
+    try {
+      await createBot({
+        amount: ethers.utils.parseEther(amountToSwap),
+        grids: Number(grids),
+        lowerRange: lowerRange ? Number(lowerRange) : 0,
+        upperRange: upperRange ? Number(upperRange) : 0,
+      });
+      console.log('success');
+    } catch (error) {
+      console.log(error);
+    }
+  }
   
   return (
     <Box sx={{ maxWidth: 500, width: '100%', mx: 'auto', my: 4 }}>
@@ -97,7 +114,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
             {selectedTokenPriceLoading ? 
               <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />
             : <Typography variant="caption">{!!amount && `$${amount}`}</Typography>}
-            <Typography variant="caption" sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {balance > 0 ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography>
+            <Typography variant="caption" sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {!balanceData.isZero() ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography>
           </Stack>
           {selectedTargetToken && 
             <Stack spacing={1}>
@@ -105,7 +122,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
                 <Typography variant="caption">
                   Swapping Pair:
                 </Typography>
-                <Button sx={{ justifyContent: 'flex-start' }} variant="text" color="inherit" startIcon={
+                <Button sx={{ justifyContent: 'flex-start' }} variant="outlined" color="primary" startIcon={
                   <Box
                     sx={{
                       width: 24,
@@ -118,10 +135,11 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
                 } onClick={() => setSelectedTargetTokenModalOpen(true)}
                   endIcon={selectedTargetTokenPriceLoading && <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />}
                 >
-                  {selectedTargetToken.symbol} {!!selectedTargetTokenPrice && `~$${selectedTargetTokenPrice.toFixed(4)}`}
+                  {selectedTargetToken.symbol} 
+                  {!!selectedTargetTokenPrice && ` ~$${selectedTargetTokenPrice.toFixed(4)}`}
                 </Button>
               </Stack>
-              {!!targetCoinsQty && selectedTargetTokenPrice && 
+              {/* {!!targetCoinsQty && selectedTargetTokenPrice && 
               <>
                 <Divider />
                 <Stack px={2} direction="row" spacing={2} justifyContent="center">
@@ -130,7 +148,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
                   </Typography>
                 </Stack>
                 <Divider />
-              </>}
+              </>} */}
             </Stack>
           }
           {!selectedTargetToken && 
@@ -159,7 +177,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
               <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
             </Stack>
           </>}
-          {selectedTargetToken && <Button size="large" variant="outlined" color="primary" disabled={!isSubmitEnabled}>
+          {selectedTargetToken && <Button size="large" variant="outlined" color="primary" disabled={!isSubmitEnabled} onClick={handleOnSubmit}>
             {isEmptyOrZero(amountToSwap) && 'Enter Amount'}
             {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
             {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}

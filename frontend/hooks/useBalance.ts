@@ -4,29 +4,26 @@ import useSWR from "swr";
 import useKeepSWRDataLiveAsBlocksArrive from "./useKeepSWRDataLiveAsBlocksArrive";
 import { Contract } from "ethers";
 import ERC20 from "../contracts/ERC20.json";
+import { useQuery } from "@tanstack/react-query";
 
 export default function useBalance(address: string, contractAddress?: string, suspense = false) {
   const { library, chainId } = useWeb3React<Web3Provider>();
-
   const shouldFetch = typeof address === "string" && !!library;
-
-  const result = useSWR(
-    shouldFetch ? ["Balance", address, contractAddress, chainId] : null,
-    ([, address]) => {
+  const { data } = useQuery({
+    enabled: shouldFetch,
+    queryKey: ["Balance"],
+    refetchInterval: 1000,
+    queryFn: async () => {
       if (!contractAddress) {
-        return library.getBalance(address)
+        const amount = await library.getBalance(address)
+        return amount;
       } else {
         const contract = new Contract(contractAddress, ERC20, library);
-
-        return contract.methods.balanceOf(address).call();
+        const amount = contract.methods.balanceOf(address).call();
+        return amount;
       }
-    },
-    {
-      suspense,
     }
-  );
+  });
 
-  useKeepSWRDataLiveAsBlocksArrive(result.mutate);
-
-  return result;
+  return data;
 }

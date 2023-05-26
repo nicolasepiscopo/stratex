@@ -49,6 +49,11 @@ contract SingleSwap is AutomationCompatibleInterface {
         bool isFirstBreach;
     }
 
+    enum OrderType {
+        Buy,
+        Sell
+    }   
+
     mapping(uint256 => Bot) bots; // uint256 woud be the botId
     mapping(address => User) public userData;  // address is the user address
     uint256 public botsCount = 0;
@@ -58,7 +63,7 @@ contract SingleSwap is AutomationCompatibleInterface {
     address public constant WMATIC = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889; // Polygon Network :
     address public constant WETH = 0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa; // Polygon Network
 
-    event GridBreached(uint256 gridIndex, bool isFirstBreach, uint256 qty ,uint256 price);
+    event GridBreached(uint256 botId, OrderType orderType, uint256 gridIndex, bool isFirstBreach, uint256 qty ,uint256 price);
     event BytesFailure(bytes bytesFailure);
     event StringFailure(string stringFailure);
 
@@ -148,7 +153,8 @@ contract SingleSwap is AutomationCompatibleInterface {
 
         for (uint256 i = 0; i < performDataDecoded.length; i++) {
             PerformData memory performDataIndividual = performDataDecoded[i];
-            Bot storage bot = bots[performDataIndividual.botId];
+            uint256 botId = performDataIndividual.botId;
+            Bot storage bot = bots[botId];
             User storage user = userData[bot.owner];
             uint256 breachIndex = performDataIndividual.breachIndex;
             if (performDataIndividual.isFirstBreach) { // This needs to fixed maybe add same sell code in else part 
@@ -156,30 +162,30 @@ contract SingleSwap is AutomationCompatibleInterface {
                 bot.breachCounter++; 
                 // Perform Buy if there is no Order placed in n-1 grid , else Sell
                 if (breachIndex > 0 && !bot.breachedGrids[breachIndex - 1]) {
-                    _buyOrder(breachIndex, bot, user);
+                    _buyOrder(botId, breachIndex, bot, user);
                 } else {
-                    _sellOrder(breachIndex, bot, user);
+                    _sellOrder(botId, breachIndex, bot, user);
                 }
             } else {
                 if (bot.breachedGrids[breachIndex  - 1]){
-                    _sellOrder(breachIndex, bot, user);
+                    _sellOrder(botId, breachIndex, bot, user);
                 }
             }
             bot.lastExecutionTime = block.timestamp;
         }
     }
 
-    function _buyOrder(uint256 _breachedIndex, Bot storage _bot, User storage _user) internal {
+    function _buyOrder(uint256 _botId, uint256 _breachIndex, Bot storage _bot, User storage _user) internal {
         uint256 availableBalance = _user.balanceWMATIC;
         _bot.buyCounter++;
         uint256 qty = swapExactInputSingle(availableBalance, WMATIC, WETH);
-        _bot.boughtAmounts[_breachedIndex] = qty; // This quantity will come from exactInputSingle() call
+        _bot.boughtAmounts[_breachIndex] = qty; // This quantity will come from exactInputSingle() call
         _user.balanceWMATIC -= availableBalance;
         _user.balanceWETH += qty;
-        emit GridBreached(_breachedIndex, true , qty, getScaledPrice());
+        emit GridBreached(_botId, OrderType.Buy, _breachIndex, true , qty, getScaledPrice());
     }
 
-    function _sellOrder(uint256 _breachedIndex, Bot storage _bot, User memory _user) internal {
+    function _sellOrder(uint256 _botId, uint256 _breachedIndex, Bot storage _bot, User memory _user) internal {
         uint256 amountToSell = _bot.boughtAmounts[_breachedIndex - 1];
         if (amountToSell > 0) {
             delete _bot.boughtAmounts[_breachedIndex - 1];
@@ -188,7 +194,7 @@ contract SingleSwap is AutomationCompatibleInterface {
             uint256 qty = swapExactInputSingle(amountToSell, WETH, WMATIC);
             _user.balanceWETH -= amountToSell;
             _user.balanceWMATIC += qty;
-            emit GridBreached(_breachedIndex, false, amountToSell, getScaledPrice());
+            emit GridBreached(_botId, OrderType.Sell, _breachedIndex, false, amountToSell, getScaledPrice());
         }
     }
 
@@ -292,14 +298,14 @@ contract SingleSwap is AutomationCompatibleInterface {
     // function to cancel bot execution
     function cancel(uint256 botId) external {
         Bot storage bot = bots[botId];
-        require(bot[botId].owner == msg.sender, "Sender should be owner of the bot");
+        require(bot.owner == msg.sender, "Sender should be owner of the bot");
         bot.isCancelled = true;
     }
 
     // function to resume bot execution
     function resume(uint256 botId) external {
         Bot storage bot = bots[botId];
-        require(bot[botId].owner == msg.sender, "Sender should be owner of the bot");
+        require(bot.owner == msg.sender, "Sender should be owner of the bot");
         bot.isCancelled = false;
     }
 }

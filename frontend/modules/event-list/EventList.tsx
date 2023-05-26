@@ -1,5 +1,7 @@
-import { Box, Chip, Divider, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Chip, Divider, IconButton, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
 import orderBy from "lodash/orderBy";
+import { useEvents } from "./EventList.helpers";
+import { Refresh } from "@mui/icons-material";
 
 export interface Event {
   id: string;
@@ -19,12 +21,23 @@ interface BotListProps {
 }
 
 export function EventList ({ events }: BotListProps) {
+  const { events: data, refetch } = useEvents();
+
+  console.log(data);
+
   return (
     <TableContainer component={Paper}>
       <Box p={1} textAlign="center">
-        <Typography variant="overline">
-          Bots Transaction Events
-        </Typography>
+        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+          <Typography variant="overline">
+            Bots Transaction Events
+          </Typography>
+          <Tooltip title="Refresh List">
+            <IconButton onClick={() => refetch()} size="small">
+              <Refresh fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Box>
       <Table aria-label="events-table">
         <TableHead>

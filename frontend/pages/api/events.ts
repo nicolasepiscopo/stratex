@@ -1,5 +1,8 @@
-import { ethers } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
+import { JsonRpcProvider } from '@ethersproject/providers';
+import { Contract } from "@ethersproject/contracts";
+import { id } from '@ethersproject/hash';
+import { Interface } from '@ethersproject/abi';
 
 const abi = [
   {
@@ -37,17 +40,17 @@ const abi = [
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const address = '0x42AF787924287dA64a74D095517d130EAE5cDac9';
-  const provider = new ethers.providers.JsonRpcProvider(
+  const provider = new JsonRpcProvider(
     process.env.ALCHEMY_RPC
   );
-  const contract = new ethers.Contract(address, abi, provider);
+  const contract = new Contract(address, abi, provider);
 
   const logs = await contract.provider.getLogs({
     fromBlock: 0,
     toBlock: 'latest',
-    topics: [ethers.utils.id('GridBreached(uint256,bool,uint256,uint256)')]
+    topics: [id('GridBreached(uint256,bool,uint256,uint256)')]
   });
-  const i = new ethers.utils.Interface(abi);
+  const i = new Interface(abi);
 
   res.status(200).json(logs.map(log => {
     try {

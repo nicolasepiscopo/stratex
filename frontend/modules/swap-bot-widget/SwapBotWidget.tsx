@@ -16,8 +16,8 @@ import { TokenSelectorModal } from "../token-selector-modal";
 import { Token, useTokenList } from "../token-selector-modal/TokenSelectorModal.helpers";
 import { isEmptyOrZero } from "../../utils/is-empty";
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { ethers } from "ethers";
 import { useCreateBot } from "./SwapBotWidget.helpers";
+import { formatEther, parseEther } from "@ethersproject/units";
 
 interface SwapBotWidgetProps {
   onCancel?: () => void;
@@ -50,9 +50,9 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const selectedTokenImg = selectedToken?.logoURI;
   const selectedTargetTokenImg = selectedTargetToken?.logoURI;
   const amount = selectedTokenPrice ? Number(amountToSwap) * selectedTokenPrice : 0;
-  const balance = balanceData ? ethers.utils.formatEther(balanceData).toString() : 0;
+  const balance = balanceData ? formatEther(balanceData).toString() : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
-  const insufficientBalance = balanceData && ethers.utils.parseEther(`0${amountToSwap}`).gt(balanceData);
+  const insufficientBalance = balanceData && parseEther(`0${amountToSwap}`).gt(balanceData);
   const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance;
 
   const isLoading = !selectedToken;
@@ -77,7 +77,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const handleOnSubmit = async () => {
     try {
       await createBot({
-        amount: ethers.utils.parseEther(amountToSwap),
+        amount: parseEther(amountToSwap),
         grids: Number(grids),
         lowerRange: lowerRange ? Number(lowerRange) : 0,
         upperRange: upperRange ? Number(upperRange) : 0,

@@ -1,6 +1,6 @@
 import type { Web3Provider } from "@ethersproject/providers";
+import { Contract } from "@ethersproject/contracts";
 import { useWeb3React } from "@web3-react/core";
-import { Contract } from "ethers";
 import { useQuery } from "@tanstack/react-query";
 
 const ERC20Abi = [

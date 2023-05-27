@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useWeb3React } from "@web3-react/core";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "@ethersproject/bignumber";
+import { Contract } from "@ethersproject/contracts";
 
 interface UseCreateBotParams {
   upperRange: number;
@@ -50,13 +51,13 @@ export function useCreateBot() {
     }: UseCreateBotParams) => {
       const address = '0xDa3f4f092219601488B58352ed13B3dcDf457bF5';
       const signer = library.getSigner();
-      const contract = new ethers.Contract(address, abi, signer);
+      const contract = new Contract(address, abi, signer);
     
       // TODO: fix this for supporting floating point numbers
       return contract.connect(signer).CreateBot(
-        ethers.BigNumber.from(upperRange), 
-        ethers.BigNumber.from(lowerRange), 
-        ethers.BigNumber.from(grids),
+        BigNumber.from(upperRange), 
+        BigNumber.from(lowerRange), 
+        BigNumber.from(grids),
         amount
       );
     }

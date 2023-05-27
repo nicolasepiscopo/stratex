@@ -34,8 +34,8 @@ export function Navbar () {
   };
 
   const logo = <Image
-    alt="UniBot"
-    src={'/icon.png'}
+    alt="stratex"
+    src={'/logo.png'}
     width={48}
     height={48}
   />;
@@ -48,7 +48,7 @@ export function Navbar () {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ justifyContent: 'space-between'}}>
-          <ButtonBase onClick={handleOnClickLogo} sx={{ display: { md: 'flex', xs: 'none' }, mr: 1, borderRadius: '50%' }}>
+          <ButtonBase disableRipple onClick={handleOnClickLogo} sx={{ display: { md: 'flex', xs: 'none' }, mr: 4 }}>
             {logo}
           </ButtonBase>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>

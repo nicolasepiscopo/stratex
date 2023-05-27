@@ -8,9 +8,13 @@ import { useRouter } from "next/router";
 
 interface ConnectButtonProps {
   title?: string;
+  fontSize?: string;
+  startIcon?: React.ReactNode;
+  variant?: "text" | "outlined" | "contained";
+  color?: "inherit" | "primary" | "secondary" | "success" | "error" | "info" | "warning";
 }
 
-export function ConnectButton ({ title }: ConnectButtonProps) {
+export function ConnectButton ({ title, fontSize, startIcon, variant = "contained", color = "primary" }: ConnectButtonProps) {
   const { activate, setError, active, error } = useWeb3React();
   const {
     isMetaMaskInstalled,
@@ -41,8 +45,12 @@ export function ConnectButton ({ title }: ConnectButtonProps) {
   return (
     <div>
       <Button
-        variant="contained"
-        color="primary"
+        variant={variant}
+        color={color}
+        startIcon={startIcon}
+        sx={{
+          fontSize,
+        }}
         disabled={connecting}
         onClick={() => {
           if (!isWeb3Available) {

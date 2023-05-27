@@ -76,15 +76,15 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
 
   const handleOnSubmit = async () => {
     try {
-      await createBot({
+      createBot({
         amount: parseEther(amountToSwap),
         grids: Number(grids),
         lowerRange: lowerRange ? Number(lowerRange) : 0,
         upperRange: upperRange ? Number(upperRange) : 0,
       });
-      console.log('success');
+      onCancel();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
   
@@ -98,7 +98,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
       <Card variant="outlined" sx={{ p: 4, mt: 2 }}>
         <Stack spacing={2}>
           <Typography variant="h5" mb={2}>
-            Create a UniBot
+            Create a Bot
           </Typography>
           <TextField value={amountToSwap} onChange={(e) => setAmountToSwap(e.target.value ?? '0')} variant="outlined" label="Amount to Swap" InputProps={{
             endAdornment: (
@@ -185,12 +185,12 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
               <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
             </Stack>
           </>}
-          {selectedTargetToken && <Button size="large" variant="outlined" color="primary" disabled={!isSubmitEnabled} onClick={handleOnSubmit}>
+          {selectedTargetToken && <Button size="large" variant={isSubmitEnabled ? "contained" : "outlined"} color="primary" disabled={!isSubmitEnabled} onClick={handleOnSubmit}>
             {isEmptyOrZero(amountToSwap) && 'Enter Amount'}
             {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
             {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
             {insufficientBalance && 'Insufficient Balance'}
-            {isSubmitEnabled && 'Create UniBot Now'}
+            {isSubmitEnabled && 'Create Bot Now'}
           </Button>}
         </Stack>
         <TokenSelectorModal 

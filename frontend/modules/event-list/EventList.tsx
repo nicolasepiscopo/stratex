@@ -14,13 +14,25 @@ import Typography from "@mui/material/Typography";
 import orderBy from "lodash/orderBy";
 import Refresh from "@mui/icons-material/Refresh";
 import { Event } from "./EventList.helpers";
+import { toast } from "react-toastify";
 
 interface BotListProps {
   events: Event[];
-  refetch: () => void;
+  refetch: () => Promise<unknown>;
 }
 
 export function EventList ({ events, refetch }: BotListProps) {
+  const handleOnClick = () => {
+    toast.promise(
+      refetch(),
+      {
+        error: 'Error fetching events',
+        success: 'Events fetched successfully',
+        pending: 'Fetching events...',
+      }
+    )
+  }
+
   return (
     <TableContainer component={Paper}>
       <Box p={1} textAlign="center">
@@ -29,7 +41,7 @@ export function EventList ({ events, refetch }: BotListProps) {
             Bots Transaction Events
           </Typography>
           <Tooltip title="Refresh List">
-            <IconButton onClick={() => refetch()} size="small">
+            <IconButton onClick={handleOnClick} size="small">
               <Refresh fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -74,7 +86,7 @@ export function EventList ({ events, refetch }: BotListProps) {
                 <TableCell>
                   <Chip 
                     label={event.orderType.toUpperCase()}
-                    color="primary"
+                    color={event.orderType === 'buy' ? 'warning' : 'success'}
                     variant="outlined"
                   />
                 </TableCell>

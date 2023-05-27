@@ -13,7 +13,7 @@ import { useEvents } from "../event-list/EventList.helpers";
 export default function Dashboard () {
   const { account, library } = useWeb3React();
   const [isOpenSwapBotWidget, setIsOpenSwapBotWidget] = useState(false);
-  const bots = useBotList();
+  const { bots, isLoading } = useBotList();
   const { events, refetch } = useEvents();
 
   const isConnected = typeof account === "string" && !!library;
@@ -22,18 +22,22 @@ export default function Dashboard () {
   return (
     <Box>
       <Head>
-        <title>UniBot - App</title>
+        <title>StrateX - App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container maxWidth="xl">
-        {shouldShowSwapBotWidget && (
-          <SwapBotWidget onCancel={bots.length ? () => setIsOpenSwapBotWidget(false) : undefined} />
-        )}
-        {!shouldShowSwapBotWidget && (
-          <Stack direction="row" spacing={2} mt={3}>
-            <BotList bots={bots} onCreateBot={() => setIsOpenSwapBotWidget(true)}/>
-            <EventList events={events} refetch={refetch} />
-          </Stack>
+        {!isLoading && (
+          <>
+            {shouldShowSwapBotWidget && (
+              <SwapBotWidget onCancel={bots.length ? () => setIsOpenSwapBotWidget(false) : undefined} />
+            )}
+            {!shouldShowSwapBotWidget && (
+              <Stack direction="row" spacing={2} mt={3}>
+                <BotList bots={bots} onCreateBot={() => setIsOpenSwapBotWidget(true)}/>
+                <EventList events={events} refetch={refetch} />
+              </Stack>
+            )}
+          </>
         )}
       </Container>
     </Box>

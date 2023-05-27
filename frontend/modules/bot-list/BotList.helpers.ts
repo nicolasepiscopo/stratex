@@ -46,10 +46,10 @@ const abi = [
   },
 ];
 
-export function useBotList (): Bot[] {
+export function useBotList () {
   const { library, chainId } = useWeb3React();
   const tokens = useTokenList(chainId);
-  const { data = [] } = useQuery<Bot[]>({
+  const { data = [], isLoading } = useQuery<Bot[]>({
     queryKey: ['botList'],
     enabled: !!tokens.length && !!library,
     queryFn: async () => {
@@ -79,36 +79,7 @@ export function useBotList (): Bot[] {
     }
   });
 
-  const mock = false;
-
-  if (mock) {
-    return [
-      {
-        id: '1',
-        amount: 10,
-        createdAt: new Date().toISOString(),
-        lowerRange: 90,
-        upperRange: 100,
-        grids: 4,
-        token: {
-          address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-          chainId: 1,
-          decimals: 18,
-          logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
-          name: "Wrapped Ether",
-          symbol: "WETH",
-        },
-        tokenPair: {
-          address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-          chainId: 1,
-          decimals: 8,
-          logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
-          name: "Wrapped BTC",
-          symbol: "WBTC",
-        },
-      },
-    ]
-  }
-
-  return data;
+  return {
+    bots: data, isLoading
+  } as const;
 }

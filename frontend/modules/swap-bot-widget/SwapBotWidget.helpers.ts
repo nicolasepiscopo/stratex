@@ -2,6 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useWeb3React } from "@web3-react/core";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contract } from "@ethersproject/contracts";
+import { toast } from "react-toastify";
+import { parseEther } from "@ethersproject/units";
 
 interface UseCreateBotParams {
   upperRange: number;
@@ -49,17 +51,34 @@ export function useCreateBot() {
     mutationFn: async ({
       upperRange, lowerRange, grids, amount
     }: UseCreateBotParams) => {
+      const toastId = toast.loading('Creating bot...');
       const address = '0xDa3f4f092219601488B58352ed13B3dcDf457bF5';
       const signer = library.getSigner();
       const contract = new Contract(address, abi, signer);
-    
-      // TODO: fix this for supporting floating point numbers
-      return contract.connect(signer).CreateBot(
-        BigNumber.from(upperRange), 
-        BigNumber.from(lowerRange), 
-        BigNumber.from(grids),
-        amount
-      );
+
+      try {
+        const result = await contract.connect(signer).CreateBot(
+          BigNumber.from(parseEther(upperRange.toString())), 
+          BigNumber.from(parseEther(lowerRange.toString())), 
+          BigNumber.from(parseEther(grids.toString())),
+          amount
+        );
+  
+        toast.update(toastId, { 
+          render: "Bot created successfully!", 
+          type: "success", 
+          isLoading: false 
+        });
+
+        return result;
+      } catch (e) {
+        toast.update(toastId, { 
+          render: "Failed to create bot. Please try again.", 
+          type: "error",
+          isLoading: false 
+        });
+        throw e;
+      }
     }
   });
 

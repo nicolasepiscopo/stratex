@@ -1,6 +1,8 @@
-import { useWeb3React } from "@web3-react/core";
 import Head from "next/head";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import Image from "next/image";
 import { ConnectButton } from "../components/ConnectButton";
 

@@ -1,13 +1,21 @@
 import type { Web3Provider } from "@ethersproject/providers";
-import { Box, Button, Card, Divider, FormControl, MenuItem, Paper, Select, Skeleton, Stack, TextField, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { useWeb3React } from "@web3-react/core";
 import useBalance from "../../hooks/useBalance";
 import { useEffect, useState } from "react";
 import { useTokenPrice } from "../../hooks/useTokenPrice";
 import { TokenSelectorModal } from "../token-selector-modal";
-import { ETHEREUM_TOKEN, Token, useTokenList } from "../token-selector-modal/TokenSelectorModal.helpers";
+import { Token, useTokenList } from "../token-selector-modal/TokenSelectorModal.helpers";
 import { isEmptyOrZero } from "../../utils/is-empty";
-import { ArrowBack } from "@mui/icons-material";
+import ArrowBack from "@mui/icons-material/ArrowBack";
 import { ethers } from "ethers";
 import { useCreateBot } from "./SwapBotWidget.helpers";
 

@@ -1,4 +1,12 @@
-import { Avatar, Box, Button, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, Typography } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { Token } from "../token-selector-modal/TokenSelectorModal.helpers";
 
 export interface Bot {

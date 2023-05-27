@@ -1,10 +1,19 @@
 import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
-import useSWR from "swr";
-import useKeepSWRDataLiveAsBlocksArrive from "./useKeepSWRDataLiveAsBlocksArrive";
 import { Contract } from "ethers";
-import ERC20 from "../contracts/ERC20.json";
 import { useQuery } from "@tanstack/react-query";
+
+const ERC20Abi = [
+  {
+    "constant": true,
+    "inputs": [{ "name": "_owner", "type": "address" }],
+    "name": "balanceOf",
+    "outputs": [{ "name": "balance", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+]
 
 export default function useBalance(address: string, contractAddress?: string, suspense = false) {
   const { library, chainId } = useWeb3React<Web3Provider>();
@@ -18,7 +27,7 @@ export default function useBalance(address: string, contractAddress?: string, su
         const amount = await library.getBalance(address)
         return amount;
       } else {
-        const contract = new Contract(contractAddress, ERC20, library);
+        const contract = new Contract(contractAddress, ERC20Abi, library);
         const amount = contract.methods.balanceOf(address).call();
         return amount;
       }

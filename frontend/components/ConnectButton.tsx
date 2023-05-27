@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { injected } from "../connectors";
 import { useRouter } from "next/router";

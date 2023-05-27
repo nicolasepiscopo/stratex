@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useWeb3React } from "@web3-react/core";
 import { BigNumber, ethers } from "ethers";
-import { abi } from '../../artifacts/contracts/TradeBot.sol/SingleSwap.json';
 
 interface UseCreateBotParams {
   upperRange: number;
@@ -9,6 +8,37 @@ interface UseCreateBotParams {
   grids: number;
   amount: BigNumber;
 }
+
+const abi = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_upper_range",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_lower_range",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_no_of_grids",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "CreateBot",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+]
 
 export function useCreateBot() {
   const { library } = useWeb3React();

@@ -37,3 +37,7 @@ yarn-error.log*
 
 # typescript
 tsconfig.buildinfo
+
+cache
+contracts
+artifacts

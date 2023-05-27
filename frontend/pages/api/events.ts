@@ -1,6 +1,39 @@
 import { ethers } from "ethers";
-import { abi } from '../../artifacts/contracts/TradeBot.sol/SingleSwap.json'
 import { NextApiRequest, NextApiResponse } from "next";
+
+const abi = [
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "gridIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isFirstBreach",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "qty",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "name": "GridBreached",
+    "type": "event"
+  },
+]
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const address = '0x42AF787924287dA64a74D095517d130EAE5cDac9';

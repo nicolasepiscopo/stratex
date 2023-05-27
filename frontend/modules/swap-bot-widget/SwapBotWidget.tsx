@@ -24,9 +24,9 @@ interface SwapBotWidgetProps {
 }
 
 export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
-  const tokens = useTokenList();
+  const { account, chainId } = useWeb3React<Web3Provider>();
+  const tokens = useTokenList(chainId);
   const wethToken = tokens.find(token => token.symbol === 'WETH'); 
-  const { account } = useWeb3React<Web3Provider>();
   const [selectedToken, setSelectedToken] = useState<Token>();
   const balanceData = useBalance(account, selectedToken?.address);
   const [selectedTokenModalOpen, setSelectedTokenModalOpen] = useState<boolean>(false);

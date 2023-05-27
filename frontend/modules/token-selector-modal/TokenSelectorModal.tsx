@@ -39,9 +39,9 @@ export function TokenSelectorModal ({ onClose, selectedValue, open }: TokenSelec
   const [search, setSearch] = useState('');
   const { chainId } = useWeb3React<Web3Provider>();
   const filterKey = useThrottle(search, 200);
-  const tokens = useTokenList();
-  const filteredTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && token.chainId === chainId && (token.symbol.toLowerCase().includes(filterKey.toLowerCase()) || token.name.toLowerCase().includes(filterKey.toLowerCase()))), [tokens, filterKey, chainId]);
-  const popularTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && POPULAR_TOKENS.includes(token.symbol) && token.chainId === chainId), [tokens, chainId]);
+  const tokens = useTokenList(chainId);
+  const filteredTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && token.chainId === chainId && (token.symbol.toLowerCase().includes(filterKey.toLowerCase()) || token.name.toLowerCase().includes(filterKey.toLowerCase()))), [tokens, selectedValue?.symbol, chainId, filterKey]);
+  const popularTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && POPULAR_TOKENS.includes(token.symbol) && token.chainId === chainId), [tokens, selectedValue?.symbol, chainId]);
 
   const handleClose = () => {
     onClose(selectedValue);

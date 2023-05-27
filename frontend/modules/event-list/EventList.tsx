@@ -12,31 +12,15 @@ import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import orderBy from "lodash/orderBy";
-import { useEvents } from "./EventList.helpers";
 import Refresh from "@mui/icons-material/Refresh";
-
-export interface Event {
-  id: string;
-  // Crypto currency symbol
-  symbol: string;
-  symbolImage: string;
-  orderType: 'buy' | 'sell';
-  quantity: number;
-  // The price at which the order was executed
-  tradePrice: number;
-  // The date at which the order was executed
-  date: string;
-}
+import { Event } from "./EventList.helpers";
 
 interface BotListProps {
   events: Event[];
+  refetch: () => void;
 }
 
-export function EventList ({ events }: BotListProps) {
-  const { events: data, refetch } = useEvents();
-
-  console.log(data);
-
+export function EventList ({ events, refetch }: BotListProps) {
   return (
     <TableContainer component={Paper}>
       <Box p={1} textAlign="center">

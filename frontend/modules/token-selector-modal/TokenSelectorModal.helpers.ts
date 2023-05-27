@@ -19,16 +19,18 @@ export const ETHEREUM_TOKEN: Token = {
   "logoURI": getTokenImg('ETH'),
 };
 
-export function useTokenList (): Token[] {
+export function useTokenList (chainId: number | undefined): Token[] {
   const { data = [] } = useQuery({
     queryKey: ["tokenList"],
+    enabled: !!chainId,
     queryFn: async () => {
       const response = await fetch(`https://gateway.ipfs.io/ipns/tokens.uniswap.org`);
       const data = await response.json();
+      const tokens = data.tokens as Token[];
       
-      return data.tokens as Token[];
+      return tokens.filter(token => token.chainId === chainId);
     }
   });
-
+  
   return data;
 }

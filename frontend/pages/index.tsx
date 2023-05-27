@@ -18,7 +18,7 @@ function Home() {
         <Stack justifyContent="flex-start" alignItems="center" sx={{ height: '80vh'}}>
           <Box textAlign="center" pb={6}>
             <Typography variant="h1" color="primary" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
-              StratX
+              StrateX
             </Typography>
             <Typography variant="h4" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
               The first decentralized trading strategy powered by auotmation.

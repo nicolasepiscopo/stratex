@@ -8,6 +8,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Token } from "../token-selector-modal/TokenSelectorModal.helpers";
+import { useBotList } from "./BotList.helpers";
 
 export interface Bot {
   id: string;
@@ -26,6 +27,8 @@ interface BotListProps {
 }
 
 export function BotList ({ bots, onCreateBot }: BotListProps) {
+  useBotList();
+
   return (
     <Paper sx={{ minWidth: 400 }}>
       <Stack pt={1} px={2} direction="row" justifyContent="space-between" alignContent="center" alignItems="center">

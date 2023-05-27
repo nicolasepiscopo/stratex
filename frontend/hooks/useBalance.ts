@@ -28,7 +28,9 @@ export default function useBalance(address: string, contractAddress?: string, su
         return amount;
       } else {
         const contract = new Contract(contractAddress, ERC20Abi, library);
-        const amount = contract.methods.balanceOf(address).call();
+        const signer = library.getSigner();
+        const amount = await contract.connect(signer).balanceOf(address);
+        
         return amount;
       }
     }

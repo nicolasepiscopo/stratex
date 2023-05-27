@@ -1,9 +1,10 @@
 import { useWeb3React } from "@web3-react/core";
 import { useState } from "react";
-import { Bot } from "../bot-list";
-import { Event } from "../event-list";
+import { Bot, BotList } from "../bot-list";
+import { Event, EventList } from "../event-list";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
+import Stack from "@mui/material/Stack";
 import Head from "next/head";
 import { SwapBotWidget } from "../swap-bot-widget";
 
@@ -67,7 +68,7 @@ export default function Dashboard () {
   ];
 
   const isConnected = typeof account === "string" && !!library;
-  const shouldShowSwapBotWidget = (isConnected && !bots.length) || isOpenSwapBotWidget;
+  const shouldShowSwapBotWidget = isConnected || isOpenSwapBotWidget;
 
   return (
     <Box>
@@ -76,15 +77,15 @@ export default function Dashboard () {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container maxWidth="xl">
-        {/* {shouldShowSwapBotWidget && ( */}
+        {shouldShowSwapBotWidget && (
           <SwapBotWidget onCancel={bots.length ? () => setIsOpenSwapBotWidget(false) : undefined} />
-        {/* )} */}
-        {/* {!shouldShowSwapBotWidget && (
+        )}
+        {!shouldShowSwapBotWidget && (
           <Stack direction="row" spacing={2} mt={3}>
             <BotList bots={bots} onCreateBot={() => setIsOpenSwapBotWidget(true)}/>
             <EventList events={events} />
           </Stack>
-        )} */}
+        )}
       </Container>
     </Box>
   );

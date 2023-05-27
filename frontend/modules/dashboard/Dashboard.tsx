@@ -1,6 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
 import { useState } from "react";
-import { Bot, BotList } from "../bot-list";
+import { BotList } from "../bot-list";
 import { EventList } from "../event-list";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -9,6 +9,7 @@ import Head from "next/head";
 import { SwapBotWidget } from "../swap-bot-widget";
 import { useBotList } from "../bot-list/BotList.helpers";
 import { useEvents } from "../event-list/EventList.helpers";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Dashboard () {
   const { account, library } = useWeb3React();
@@ -26,6 +27,11 @@ export default function Dashboard () {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container maxWidth="xl">
+        {isLoading && (
+          <Stack justifyContent="center" alignItems="center" sx={{ position: 'absolute', top: 0, left: 0, bottom: '70vh', right: 0 }}>
+            <CircularProgress />
+          </Stack>
+        )}
         {!isLoading && (
           <>
             {shouldShowSwapBotWidget && (

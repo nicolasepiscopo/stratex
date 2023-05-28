@@ -1,6 +1,8 @@
-import { useWeb3React } from "@web3-react/core";
 import Head from "next/head";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import Image from "next/image";
 import { ConnectButton } from "../components/ConnectButton";
 
@@ -8,40 +10,42 @@ function Home() {
   return (
     <Box>
       <Head>
-        <title>UniBot</title>
+        <title>StrateX</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container maxWidth="xl">
-        <Stack justifyContent="space-between" alignItems="center" sx={{ height: '80vh'}}>
-          <Image 
-            alt="UniBot"
-            src="/logo.png"
-            width={200}
-            height={200}
-          />
-          <Box textAlign="center">
+        <Stack justifyContent="flex-start" alignItems="center" sx={{ height: '80vh'}}>
+          <Box textAlign="center" pb={6}>
             <Typography variant="h1" color="primary" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
-              UNIBOT
+              StrateX
             </Typography>
-            <Typography variant="h4" color="primary" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
-              The first decentralized trading bot powered by <strong>AWS</strong>, <strong>Chainlink</strong> and <strong>UniSwap</strong> protocol.
+            <Typography variant="h4" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
+              The first decentralized trading strategy powered by auotmation.
             </Typography>
           </Box>
-          <Box py={6}>
+          <Image 
+            alt="StrateX"
+            src="/robot.png"
+            width={410}
+            height={230}
+          />
+          <Box pb={6}>
             <ConnectButton 
-              title="start making money"
+              variant="outlined"
+              title="crate your first bot"
+              fontSize="1.5rem"
+              startIcon={<>🚀</>}
             />
           </Box>
           <Box sx={{
             width: '70%',
-            margin: 'auto',
           }}>
             <Typography sx={{
               opacity: .5,
               color: 'white',
               lineHeight: '2',
             }}>
-              Welcome to UniBot, the application that allows you to perform automated swaps with smart contracts using buy and sell limits on Uniswap. With UniBot, you can make the most of your trades and get the best results quickly and easily. Our intuitive and user-friendly interface allows you to set your own buy and sell limits to get the best possible price.
+              Welcome to StrateX, the application that allows you to perform automated decentralized transactions with smart contracts using buy and sell limits and grids on the blockchain. With StrateX, you can make the most of your trades and get the best results quickly and easily. Our intuitive and user-friendly interface allows you to set your own buy and sell limits to get the best possible price.
             </Typography>
           </Box>
         </Stack>

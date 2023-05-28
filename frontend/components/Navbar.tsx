@@ -1,5 +1,14 @@
-import { Menu as MenuIcon } from "@mui/icons-material";
-import { AppBar, Box, Button, ButtonBase, Container, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
+import Container from "@mui/material/Container";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import Image from "next/image";
 import { useState } from "react";
 import Account from "./Account";
@@ -25,8 +34,8 @@ export function Navbar () {
   };
 
   const logo = <Image
-    alt="UniBot"
-    src={'/icon.png'}
+    alt="stratex"
+    src={'/logo.png'}
     width={48}
     height={48}
   />;
@@ -39,7 +48,7 @@ export function Navbar () {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ justifyContent: 'space-between'}}>
-          <ButtonBase onClick={handleOnClickLogo} sx={{ display: { md: 'flex', xs: 'none' }, mr: 1, borderRadius: '50%' }}>
+          <ButtonBase disableRipple onClick={handleOnClickLogo} sx={{ display: { md: 'flex', xs: 'none' }, mr: 4 }}>
             {logo}
           </ButtonBase>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>

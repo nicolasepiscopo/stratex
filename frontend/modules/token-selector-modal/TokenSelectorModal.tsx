@@ -1,9 +1,21 @@
 import type { Web3Provider } from "@ethersproject/providers";
-import { Avatar, ButtonBase, Chip, Dialog, DialogTitle, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, TextField } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import ButtonBase from "@mui/material/ButtonBase";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
 import Image from "next/image";
 import { Virtuoso } from 'react-virtuoso'
 import { Token, useTokenList } from "./TokenSelectorModal.helpers";
-import { Clear, Search } from "@mui/icons-material";
+import Clear from "@mui/icons-material/Clear";
+import Search from "@mui/icons-material/Search";
 import { useMemo, useState } from "react";
 import { useThrottle } from "../../hooks/useThrottle";
 import { useWeb3React } from "@web3-react/core";
@@ -27,9 +39,9 @@ export function TokenSelectorModal ({ onClose, selectedValue, open }: TokenSelec
   const [search, setSearch] = useState('');
   const { chainId } = useWeb3React<Web3Provider>();
   const filterKey = useThrottle(search, 200);
-  const tokens = useTokenList();
-  const filteredTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && token.chainId === chainId && (token.symbol.toLowerCase().includes(filterKey.toLowerCase()) || token.name.toLowerCase().includes(filterKey.toLowerCase()))), [tokens, filterKey, chainId]);
-  const popularTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && POPULAR_TOKENS.includes(token.symbol) && token.chainId === chainId), [tokens, chainId]);
+  const tokens = useTokenList(chainId);
+  const filteredTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && token.chainId === chainId && (token.symbol.toLowerCase().includes(filterKey.toLowerCase()) || token.name.toLowerCase().includes(filterKey.toLowerCase()))), [tokens, selectedValue?.symbol, chainId, filterKey]);
+  const popularTokens = useMemo(() => tokens.filter(token => token.symbol !== selectedValue?.symbol && POPULAR_TOKENS.includes(token.symbol) && token.chainId === chainId), [tokens, selectedValue?.symbol, chainId]);
 
   const handleClose = () => {
     onClose(selectedValue);

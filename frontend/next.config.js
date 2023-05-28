@@ -1,9 +1,13 @@
 // @ts-check
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 /**
  * @type {import('next').NextConfig}
  **/
-module.exports = {
+module.exports = withBundleAnalyzer({
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -11,10 +15,6 @@ module.exports = {
         protocol: "https",
         hostname: "**",
       },
-      {
-        protocol: "ipfs",
-        hostname: "**",
-      },
     ],
   }
-};
+})

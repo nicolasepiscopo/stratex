@@ -4,7 +4,13 @@ import useENSName from "../hooks/useENSName";
 import { shortenHex } from "../util";
 import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
 import useEagerConnect from "../hooks/useEagerConnect";
-import { Box, Button, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import { ConnectButton } from "./ConnectButton";
 
 const Account = () => {

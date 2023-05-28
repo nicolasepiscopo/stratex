@@ -11,6 +11,8 @@ import { theme } from "../styles/theme";
 import { Navbar } from "../components/Navbar";
 import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,7 @@ function NextWeb3App({ Component, pageProps }: AppProps) {
           <Navbar />
           <Component {...pageProps} />
           <Analytics />
+          <ToastContainer position="top-center" theme="dark" limit={1} />
         </ThemeProvider>
       </QueryClientProvider>
     </Web3ReactProvider>

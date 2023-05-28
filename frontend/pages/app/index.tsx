@@ -1,30 +1,15 @@
-import { useWeb3React } from "@web3-react/core";
-import Head from "next/head";
-import { Box, Container } from "@mui/material";
-import { SwapBotWidget } from "../../modules/swap-bot-widget";
-import { Bot, BotList } from "../../modules/bot-list";
+import dynamic from "next/dynamic";
+
+export const Dashboard = dynamic(
+  () => import('../../modules/dashboard/Dashboard'),
+  {
+    ssr: false,
+  }
+);
 
 function App() {
-  const { account, library } = useWeb3React();
-  const bots: Bot[] = [];
-
-  const isConnected = typeof account === "string" && !!library;
-
   return (
-    <Box>
-      <Head>
-        <title>UniBot - App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Container maxWidth="xl">
-        {isConnected && !bots.length && (
-          <SwapBotWidget />
-        )}
-        {isConnected && !!bots.length && (
-          <BotList bots={bots} />
-        )}
-      </Container>
-    </Box>
+    <Dashboard />
   );
 }
 

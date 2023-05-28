@@ -33,6 +33,11 @@ contract SingleSwap is AutomationCompatibleInterface {
     uint256 private lastExecutionTime;
     uint256 private interval = 60;
 
+    uint256 public upper_range;
+    uint256 public lower_range;
+    uint256 public no_of_grids;
+    uint256 public amount;
+
     address public constant WMATIC = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889; // Polygon Network :
     address public constant WETH = 0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa; // Polygon Network
 
@@ -50,16 +55,44 @@ contract SingleSwap is AutomationCompatibleInterface {
     // For this example, we will set the pool fee to 0.3%.
     uint24 public constant poolFee = 3000;
 
+
+    function getBotsDetails()  public view returns (uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount, address tokeIn ,address tokenOut) {
+        return (upper_range, lower_range, no_of_grids, amount, WMATIC , WETH);
+    }
+
+    function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount) public {
+        upper_range = _upper_range;
+        lower_range = _lower_range;
+        no_of_grids = _no_of_grids;
+        amount = _amount;
+        //IERC20(WMATIC).approve(msg.sender, amount);
+        //IERC20(WMATIC).transferFrom(msg.sender, address(this), amount);
+        uint256 dist = (upper_range - lower_range) / no_of_grids;
+        uint256 k = 0;
+        for (uint256 i = 0; i < no_of_grids; i++) {
+            grids.push(lower_range + k);
+            k = k + dist;
+        }
+    }
+
+    function getGrids() public view returns (uint256[] memory _grids)  {
+        return grids;
+    }
+
     constructor() {
         priceFeed = AggregatorV3Interface(
             0x0715A7794a1dc8e42615F059dD6e406A6594651A // ETH-USD in Mumbai Testnet
         );
-        grids = [1787, 1796, 1805, 1814, 1823, 1832, 1842, 1862];
+        //grids = [1787, 1796, 1805, 1814, 1823, 1832, 1842, 1862];
         breachCounter = 0;
     }
 
     function checkUpkeep(bytes calldata ) external view override returns (bool upkeepNeeded, bytes memory performData)
     {
+        if (grids.length == 0) {
+            upkeepNeeded = false;
+            return (upkeepNeeded, performData); 
+        }
         uint price = getScaledPrice();
         uint256 minDistance = type(uint256).max;
         uint256 breachIndex = grids.length;

@@ -24,6 +24,30 @@ contract SingleSwap is AutomationCompatibleInterface {
     address public constant routerAddress = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     ISwapRouter public immutable swapRouter = ISwapRouter(routerAddress);
 
+    struct Bot {
+        uint256 upper_range;
+        uint256 lower_range;
+        uint256[] grids;
+        uint256 breachCounter;
+        uint256 buyCounter;
+        uint256 sellCounter;
+        uint256 lastExecutionTime;
+        bool isCancelled;
+    }
+    Bot[] userBots;
+    uint256 botCounter = 0;
+    struct PerformData {
+        uint256 botId;
+        uint256 breachIndex;
+        bool isFirstBreach;
+    }
+    //Bot ID => breachIndex => isbreached
+    mapping(uint256 => mapping(uint256 => bool)) breachedBotGrids;
+    mapping(uint256 => mapping(uint256 => uint256)) boughtBotAmounts;
+
+
+
+
     uint256[] public grids;
     mapping(uint256 => bool) private breachedGrids;
     uint256 public breachCounter;
@@ -61,22 +85,34 @@ contract SingleSwap is AutomationCompatibleInterface {
     }
 
     function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount) public {
-        upper_range = _upper_range;
-        lower_range = _lower_range;
-        no_of_grids = _no_of_grids;
-        amount = _amount;
+
+        amount  = _amount;
         //IERC20(WMATIC).approve(msg.sender, amount);
         //IERC20(WMATIC).transferFrom(msg.sender, address(this), amount);
-        uint256 dist = (upper_range - lower_range) / no_of_grids;
+        mapping(uint256 => bool) memory initialMapping;
+        initialMapping[0] = false;
+        Bot memory newBot = Bot({
+            upper_range: _upper_range,
+            lower_range: _lower_range,
+            grids: new uint256[](_no_of_grids),
+            breachCounter: 0,
+            buyCounter: 0,
+            sellCounter: 0,
+            lastExecutionTime: block.timestamp,
+            isCancelled: false
+        });
+        userBots.push(newBot);
+        uint256 dist = (_upper_range - _lower_range) / _no_of_grids;
         uint256 k = 0;
-        for (uint256 i = 0; i < no_of_grids; i++) {
-            grids.push(lower_range + k);
+        for (uint256 i = 0; i < _no_of_grids; i++) {
+            userBots[botCounter].grids.push(_lower_range + k);
             k = k + dist;
         }
+        botCounter ++;
     }
 
-    function getGrids() public view returns (uint256[] memory _grids)  {
-        return grids;
+    function getGrids(uint256 _botIndex) public view returns (uint256[] memory _grids)  {
+        return userBots[_botIndex].grids;
     }
 
     constructor() {
@@ -89,67 +125,129 @@ contract SingleSwap is AutomationCompatibleInterface {
 
     function checkUpkeep(bytes calldata ) external view override returns (bool upkeepNeeded, bytes memory performData)
     {
-        if (grids.length == 0) {
-            upkeepNeeded = false;
-            return (upkeepNeeded, performData); 
-        }
+        PerformData[] memory performDataUnencoded; // for each botId related the PerfomData
+        upkeepNeeded = false;
+
         uint price = getScaledPrice();
+        for (uint256 i = 0; i < botCounter; i++) {
+            if(userBots[i].grids.length == 0 || !userBots[i].isCancelled) {
+                (bool _upkeepNeeded, uint256 breachIndex, bool isFirstBreach) = checkBots(i, price);
+                if (_upkeepNeeded) {
+                    performDataUnencoded[i] = PerformData(i, breachIndex, isFirstBreach);
+                    upkeepNeeded = true;
+                }
+            }
+        }
+        if (upkeepNeeded) performData = abi.encode(performDataUnencoded);
+        return (upkeepNeeded, performData); 
+
+        // if (grids.length == 0) {
+        //     upkeepNeeded = false;
+        //     return (upkeepNeeded, performData); 
+        // }
+        // uint price = getScaledPrice();
+        // uint256 minDistance = type(uint256).max;
+        // uint256 breachIndex = grids.length;
+        // for (uint256 i = 0; i < grids.length; i++) {
+        //     uint256 distance = price > grids[i] ? price - grids[i] : grids[i] - price;
+        //     if (distance < minDistance) {
+        //         minDistance = distance;
+        //         breachIndex = i;
+        //     }
+        // }
+        // bool telapsed = (block.timestamp - lastExecutionTime) > interval;
+        // if (minDistance <= 2 && telapsed) { // In vicinity of 0.10% of the Grid
+        //     if (!breachedGrids[breachIndex]) {
+        //         upkeepNeeded = true;
+        //         performData = abi.encode(breachIndex, true);
+        //     } else {
+        //         upkeepNeeded = true;
+        //         performData = abi.encode(breachIndex, false);
+        //     }
+        // }
+    }
+    function checkBots(uint256 _botId, uint256 _price) internal view returns (bool upkeepNeeded, uint256 breachIndex, bool isFirstBreach) {
+
         uint256 minDistance = type(uint256).max;
-        uint256 breachIndex = grids.length;
-        for (uint256 i = 0; i < grids.length; i++) {
-            uint256 distance = price > grids[i] ? price - grids[i] : grids[i] - price;
+        uint256 breachIndex = userBots[_botId].grids.length;
+
+        for (uint256 i = 0; i < userBots[_botId].grids.length; i++) {
+            uint256 distance = _price > userBots[_botId].grids[i] ? 
+                _price - userBots[_botId].grids[i] 
+                : 
+                userBots[_botId].grids[i] - _price;
             if (distance < minDistance) {
                 minDistance = distance;
                 breachIndex = i;
             }
         }
-        bool telapsed = (block.timestamp - lastExecutionTime) > interval;
+        bool telapsed = (block.timestamp - userBots[_botId].lastExecutionTime) > interval;
+        isFirstBreach = false;
+        upkeepNeeded = false;
         if (minDistance <= 2 && telapsed) { // In vicinity of 0.10% of the Grid
-            if (!breachedGrids[breachIndex]) {
+            if (!breachedBotGrids[_botId][breachIndex]) {
                 upkeepNeeded = true;
-                performData = abi.encode(breachIndex, true);
+                isFirstBreach = true;
             } else {
                 upkeepNeeded = true;
-                performData = abi.encode(breachIndex, false);
+                isFirstBreach = false;
             }
         }
     }
 
     function performUpkeep(bytes calldata performData) external override {
         uint256 amountToSell = 0;
-        (uint256 breachedIndex, bool isFirstBreach) = abi.decode(performData, (uint256, bool));
-        if (isFirstBreach) { // This needs to fixed maybe add same sell code in else part 
-            breachedGrids[breachedIndex] = true;
-            breachCounter++; 
-            // Perform Buy if there is no Order placed in n-1 grid , else Sell
-            if (breachedIndex > 0 && !breachedGrids[breachedIndex - 1]) {
-                buyCounter++;
-                uint256 qty = swapExactInputSingle(150000000000000000, WMATIC, WETH);
-                boughtAmounts[breachedIndex] = qty; // This quantity will come from exactInputSingle() call
-                emit GridBreached(breachedIndex, true , qty, getScaledPrice());
+        //(uint256 breachedIndex, bool isFirstBreach) = abi.decode(performData, (uint256, bool));
+        PerformData[] memory performDataDecoded = abi.decode(performData, (PerformData[]));
+        for (uint256 i = 0; i < performDataDecoded.length; i++) {
+            PerformData memory performDataIndividual = performDataDecoded[i];
+            uint256 botId = performDataIndividual.botId;
+            uint256 breachIndex = performDataIndividual.breachIndex;
+            Bot storage bot = userBots[botId];
+            if (performDataIndividual.isFirstBreach) { // This needs to fixed maybe add same sell code in else part 
+                breachedBotGrids[botId][breachIndex] = true;
+                userBots[botId].breachCounter ++;
+                //breachedGrids[breachedIndex] = true;
+                //breachCounter++; 
+
+                // Perform Buy if there is no Order placed in n-1 grid , else Sell
+                if (breachIndex > 0 && !breachedBotGrids[botId][breachIndex - 1]) {
+                    userBots[botId].buyCounter++;
+                    uint256 qty = swapExactInputSingle(150000000000000000, WMATIC, WETH);
+                    boughtBotAmounts[botId][breachIndex] = qty;
+                    //boughtAmounts[breachedIndex] = qty; // This quantity will come from exactInputSingle() call
+                    emit GridBreached(breachIndex, true , qty, getScaledPrice());
+                    //=======> FOR THE EVENT WE WOULD NEED TO ADD THE BOTINDEX
+                } else {
+                    amountToSell = boughtBotAmounts[botId][breachIndex - 1];
+                    //amountToSell = boughtAmounts[breachedIndex - 1];
+                    if (amountToSell > 0) {
+                        delete boughtBotAmounts[botId][breachIndex - 1];
+                        delete breachedBotGrids[botId][breachIndex - 1];
+                        // delete boughtAmounts[breachedIndex - 1];
+                        // delete breachedGrids[breachedIndex - 1];
+                        userBots[botId].sellCounter++;
+                        swapExactInputSingle(amountToSell, WETH, WMATIC);
+                        emit GridBreached(breachIndex, false, amountToSell, getScaledPrice());
+                        //=======> FOR THE EVENT WE WOULD NEED TO ADD THE BOTINDEX
+                    }
+                }
             } else {
-                amountToSell = boughtAmounts[breachedIndex - 1];
-                if (amountToSell > 0) {
-                    delete boughtAmounts[breachedIndex - 1];
-                    delete breachedGrids[breachedIndex - 1];
-                    sellCounter++;
-                    swapExactInputSingle(amountToSell, WETH, WMATIC);
-                    emit GridBreached(breachedIndex, false, amountToSell, getScaledPrice());
+                if (breachedBotGrids[botId][breachIndex - 1]){
+                    amountToSell = boughtBotAmounts[botId][breachIndex - 1];
+                    if (amountToSell > 0) {
+                        delete boughtBotAmounts[botId][breachIndex - 1];
+                        delete breachedBotGrids[botId][breachIndex - 1];
+                        // delete boughtAmounts[breachedIndex - 1];
+                        // delete breachedGrids[breachedIndex - 1];
+                        userBots[botId].sellCounter++;
+                        swapExactInputSingle(amountToSell, WETH, WMATIC);
+                        emit GridBreached(breachIndex, false, amountToSell, getScaledPrice());
+                    }
                 }
             }
-        } else {
-            if (breachedGrids[breachedIndex - 1]){
-                amountToSell = boughtAmounts[breachedIndex - 1];
-                if (amountToSell > 0) {
-                    delete boughtAmounts[breachedIndex - 1];
-                    delete breachedGrids[breachedIndex - 1];
-                    sellCounter++;
-                    swapExactInputSingle(amountToSell, WETH, WMATIC);
-                    emit GridBreached(breachedIndex, false, amountToSell, getScaledPrice());
-                }
-            }
-       }
-       lastExecutionTime = block.timestamp;
+            userBots[botId].lastExecutionTime = block.timestamp;
+        }
     }
 
 

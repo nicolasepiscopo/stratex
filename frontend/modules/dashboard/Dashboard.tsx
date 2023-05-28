@@ -10,8 +10,11 @@ import { SwapBotWidget } from "../swap-bot-widget";
 import { useBotList } from "../bot-list/BotList.helpers";
 import { useEvents } from "../event-list/EventList.helpers";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useMediaQuery } from "@mui/material";
+import { theme } from "../../styles/theme";
 
 export default function Dashboard () {
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'));
   const { account, library } = useWeb3React();
   const [isOpenSwapBotWidget, setIsOpenSwapBotWidget] = useState(false);
   const { bots, isLoading } = useBotList();
@@ -37,8 +40,14 @@ export default function Dashboard () {
             {shouldShowSwapBotWidget && (
               <SwapBotWidget onCancel={bots.length ? () => setIsOpenSwapBotWidget(false) : undefined} />
             )}
-            {!shouldShowSwapBotWidget && (
+            {!shouldShowSwapBotWidget && !isSmallScreen && (
               <Stack direction="row" spacing={2} mt={3}>
+                <BotList bots={bots} onCreateBot={() => setIsOpenSwapBotWidget(true)}/>
+                <EventList events={events} refetch={refetch} />
+              </Stack>
+            )}
+            {!shouldShowSwapBotWidget && isSmallScreen && (
+              <Stack direction="column" spacing={2} mt={3}>
                 <BotList bots={bots} onCreateBot={() => setIsOpenSwapBotWidget(true)}/>
                 <EventList events={events} refetch={refetch} />
               </Stack>

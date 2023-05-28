@@ -5,7 +5,6 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Image from "next/image";
 import { ConnectButton } from "../components/ConnectButton";
-import Rocket from "@mui/icons-material/Rocket";
 
 function Home() {
   return (

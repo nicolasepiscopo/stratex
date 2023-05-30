@@ -33,10 +33,10 @@ const Account = () => {
     return (
       <>
         <Box sx={{ display: { md: 'flex', xs: 'none' } }}>
-          <ConnectButton />
+          <ConnectButton variant="outlined" color="secondary" />
         </Box>
         <Box sx={{ display: { md: 'none', xs: 'flex' } }}>
-          <ConnectButton title="Connect" />
+          <ConnectButton title="Connect" variant="outlined" color="secondary" />
         </Box>
       </>
     );

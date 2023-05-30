@@ -10,29 +10,23 @@ function Home() {
   return (
     <Box>
       <Head>
-        <title>StrateX</title>
+        <title>StratEx</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container maxWidth="xl">
         <Stack justifyContent="flex-start" alignItems="center" sx={{ height: '80vh'}}>
           <Box textAlign="center" pb={6}>
             <Typography variant="h1" color="primary" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
-              StrateX
+              StratEx
             </Typography>
             <Typography variant="h4" sx={{ fontFamily: `'Rajdhani', sans-serif` }}>
-              The first decentralized trading strategy powered by auotmation.
+              The first decentralized trading strategy powered by automation.
             </Typography>
           </Box>
-          <Image 
-            alt="StrateX"
-            src="/robot.png"
-            width={410}
-            height={230}
-          />
           <Box pb={6}>
             <ConnectButton 
               variant="outlined"
-              title="crate your first bot"
+              title="create your first bot"
               fontSize="1.5rem"
               startIcon={<>🚀</>}
             />
@@ -45,7 +39,7 @@ function Home() {
               color: 'white',
               lineHeight: '2',
             }}>
-              Welcome to StrateX, the application that allows you to perform automated decentralized transactions with smart contracts using buy and sell limits and grids on the blockchain. With StrateX, you can make the most of your trades and get the best results quickly and easily. Our intuitive and user-friendly interface allows you to set your own buy and sell limits to get the best possible price.
+              Welcome to StratEx, the application that allows you to perform automated decentralized transactions with smart contracts using buy and sell limits and grids on the blockchain. With StratEx, you can make the most of your trades and get the best results quickly and easily. Our intuitive and user-friendly interface allows you to set your own buy and sell limits to get the best possible price.
             </Typography>
           </Box>
         </Stack>

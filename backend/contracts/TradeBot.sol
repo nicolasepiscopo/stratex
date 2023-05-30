@@ -60,16 +60,17 @@ contract SingleSwap is AutomationCompatibleInterface {
         return (upper_range, lower_range, no_of_grids, amount, WMATIC , WETH);
     }
 
-    function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount) public payable {
+    function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount) public {
         upper_range = _upper_range;
         lower_range = _lower_range;
         no_of_grids = _no_of_grids;
         amount = _amount;
-        IERC20(WMATIC).transferFrom(msg.sender, address(this), amount);
+        //IERC20(WMATIC).approve(msg.sender, amount);
+        //IERC20(WMATIC).transferFrom(msg.sender, address(this), amount);
         uint256 dist = (upper_range - lower_range) / no_of_grids;
-        uint k = 0;
-        for (uint i = 0; i <= no_of_grids; i++) {
-            grids[i] = lower_range + k;
+        uint256 k = 0;
+        for (uint256 i = 0; i < no_of_grids; i++) {
+            grids.push(lower_range + k);
             k = k + dist;
         }
     }

@@ -41,7 +41,7 @@ export function BotList ({ bots, onCreateBot }: BotListProps) {
       <List>
         {bots.map((bot) => {
           const primary = `${bot.amount} ${bot.token.symbol} to ${bot.tokenPair.symbol}`;
-          const secondary = `${bot.grids} Grids between ${bot.lowerRange} and ${bot.upperRange}`;
+          const secondary = `${bot.grids} Grids between $${bot.lowerRange} and $${bot.upperRange}`;
 
           return (
             <ListItem key={bot.id}>

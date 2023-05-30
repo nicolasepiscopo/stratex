@@ -94,7 +94,7 @@ export function EventList ({ events, refetch }: BotListProps) {
                   {event.quantity}
                 </TableCell>
                 <TableCell>
-                  {event.tradePrice}
+                  ${event.tradePrice}
                 </TableCell>
                 <TableCell>
                   {event.date}

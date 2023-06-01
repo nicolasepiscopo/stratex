@@ -34,7 +34,7 @@ contract SingleSwap is AutomationCompatibleInterface {
         uint256 lastExecutionTime;
         bool isCancelled;
     }
-    Bot[] userBots;
+    Bot[] public userBots;
     uint256 botCounter = 0;
     struct PerformData {
         uint256 botId;
@@ -45,11 +45,9 @@ contract SingleSwap is AutomationCompatibleInterface {
     mapping(uint256 => mapping(uint256 => bool)) breachedBotGrids;
     mapping(uint256 => mapping(uint256 => uint256)) boughtBotAmounts;
 
+    uint256 public balanceWMATIC;
+    uint256 public balanceWETH;
 
-
-
-    uint256[] public grids;
-    mapping(uint256 => bool) private breachedGrids;
     uint256 public breachCounter;
     uint256 public buyCounter;
     uint256 public sellCounter;
@@ -69,13 +67,6 @@ contract SingleSwap is AutomationCompatibleInterface {
     event BytesFailure(bytes bytesFailure);
     event StringFailure(string stringFailure);
 
-
-    //address public constant GETH  = 0xdD69DB25F6D620A7baD3023c5d32761D353D3De9 ; // Goerli ETH
-    //address public constant GLINK = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB; // goerli  LINK
-
-
-    IERC20 public linkToken = IERC20(WMATIC);
-
     // For this example, we will set the pool fee to 0.3%.
     uint24 public constant poolFee = 3000;
 
@@ -85,16 +76,15 @@ contract SingleSwap is AutomationCompatibleInterface {
     }
 
     function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount) public {
-
+        IERC20(WMATIC).transferFrom(msg.sender, address(this), _amount);
+        IERC20(WMATIC).approve(address(swapRouter), _amount);
+        balanceWMATIC += _amount;
         amount  = _amount;
-        //IERC20(WMATIC).approve(msg.sender, amount);
-        //IERC20(WMATIC).transferFrom(msg.sender, address(this), amount);
-        mapping(uint256 => bool) memory initialMapping;
-        initialMapping[0] = false;
+        uint256[] memory grids;
         Bot memory newBot = Bot({
             upper_range: _upper_range,
             lower_range: _lower_range,
-            grids: new uint256[](_no_of_grids),
+            grids: grids,
             breachCounter: 0,
             buyCounter: 0,
             sellCounter: 0,
@@ -169,7 +159,7 @@ contract SingleSwap is AutomationCompatibleInterface {
     function checkBots(uint256 _botId, uint256 _price) internal view returns (bool upkeepNeeded, uint256 breachIndex, bool isFirstBreach) {
 
         uint256 minDistance = type(uint256).max;
-        uint256 breachIndex = userBots[_botId].grids.length;
+        breachIndex = userBots[_botId].grids.length;
 
         for (uint256 i = 0; i < userBots[_botId].grids.length; i++) {
             uint256 distance = _price > userBots[_botId].grids[i] ? 
@@ -206,13 +196,13 @@ contract SingleSwap is AutomationCompatibleInterface {
             Bot storage bot = userBots[botId];
             if (performDataIndividual.isFirstBreach) { // This needs to fixed maybe add same sell code in else part 
                 breachedBotGrids[botId][breachIndex] = true;
-                userBots[botId].breachCounter ++;
+                bot.breachCounter ++;
                 //breachedGrids[breachedIndex] = true;
                 //breachCounter++; 
 
                 // Perform Buy if there is no Order placed in n-1 grid , else Sell
                 if (breachIndex > 0 && !breachedBotGrids[botId][breachIndex - 1]) {
-                    userBots[botId].buyCounter++;
+                    bot.buyCounter++;
                     uint256 qty = swapExactInputSingle(150000000000000000, WMATIC, WETH);
                     boughtBotAmounts[botId][breachIndex] = qty;
                     //boughtAmounts[breachedIndex] = qty; // This quantity will come from exactInputSingle() call
@@ -226,7 +216,7 @@ contract SingleSwap is AutomationCompatibleInterface {
                         delete breachedBotGrids[botId][breachIndex - 1];
                         // delete boughtAmounts[breachedIndex - 1];
                         // delete breachedGrids[breachedIndex - 1];
-                        userBots[botId].sellCounter++;
+                        bot.sellCounter++;
                         swapExactInputSingle(amountToSell, WETH, WMATIC);
                         emit GridBreached(breachIndex, false, amountToSell, getScaledPrice());
                         //=======> FOR THE EVENT WE WOULD NEED TO ADD THE BOTINDEX
@@ -240,21 +230,20 @@ contract SingleSwap is AutomationCompatibleInterface {
                         delete breachedBotGrids[botId][breachIndex - 1];
                         // delete boughtAmounts[breachedIndex - 1];
                         // delete breachedGrids[breachedIndex - 1];
-                        userBots[botId].sellCounter++;
+                        bot.sellCounter++;
                         swapExactInputSingle(amountToSell, WETH, WMATIC);
                         emit GridBreached(breachIndex, false, amountToSell, getScaledPrice());
                     }
                 }
             }
-            userBots[botId].lastExecutionTime = block.timestamp;
+            bot.lastExecutionTime = block.timestamp;
         }
     }
 
 
     function swapExactInputSingle(uint256 amountIn, address tin , address tout) public payable returns (uint256 amountOut)
     {
-        linkToken.approve(address(swapRouter), amountIn);
-
+        // user has approved bot to spend amount
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
             .ExactInputSingleParams({
                 tokenIn:  tin,
@@ -278,44 +267,24 @@ contract SingleSwap is AutomationCompatibleInterface {
            emit BytesFailure(error);
        }
     }
-
-    function withdraw() public  {
-        address payable to = payable(msg.sender);
-        uint256 balance = address(this).balance;
-        to.transfer(balance);
-    }
-
-     function depositWmatic(uint256 amount) public payable {
-        require(msg.value == 0, "ETH not accepted");
-        IERC20(WMATIC).transferFrom(msg.sender, address(this), amount);
-    }
     
-    function withdrawWmatic(uint256 amount) public {
-        require(IERC20(WMATIC).balanceOf(address(this)) >= amount, "Insufficient balance");        
-        IERC20(WMATIC).transfer(msg.sender, amount);
+    function withdrawWmatic(uint256 _amount) public {
+        require(balanceWMATIC >= _amount, "Insufficient balance");
+        require(IERC20(WMATIC).balanceOf(address(this)) >= _amount, "Insufficient balance");        
+        IERC20(WMATIC).transfer(msg.sender, _amount);
+        balanceWMATIC -= _amount;
     }
 
-
-    function payContract() public payable {
-        // No need of code 
-    }
-
-    function getBalance() view public returns (uint) {
-        return address(this).balance;
-    }
-
-    function getAllowance() view public returns (uint) {
-        return linkToken.allowance(address(this), address(swapRouter));
-    }
-
-    function setAllowance() public {
-        linkToken.approve(address(swapRouter), 5000000000000000000);
+    function withdrawWeth(uint256 _amount) public {
+        require(balanceWETH >= _amount, "Insufficient balance");
+        require(IERC20(WETH).balanceOf(address(this)) >= _amount, "Insufficient balance");        
+        IERC20(WETH).transfer(msg.sender, _amount);
+        balanceWETH -= _amount;
     }
 
     function getDecimals() public view returns (uint8) {
         return priceFeed.decimals();
     }
-
 
     function getOraclePrice() public view returns (int) {
         (
@@ -335,5 +304,10 @@ contract SingleSwap is AutomationCompatibleInterface {
         return convertedPrice;
     }
 
-    receive() payable external {}
+     // function to cancel/resume bot execution
+    function toogleBot(uint256 botIndex) external {
+        Bot storage bot = userBots[botIndex];
+        bot.isCancelled = !bot.isCancelled;
+    }
+    
 }

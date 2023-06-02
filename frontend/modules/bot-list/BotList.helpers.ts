@@ -5,7 +5,7 @@ import { Bot } from "./BotList";
 import { useTokenList } from "../token-selector-modal/TokenSelectorModal.helpers";
 import { formatEther, parseEther } from "@ethersproject/units";
 
-const abi = [
+const STRATEX_ABI = [
   {
     "inputs": [],
     "name": "getBotsDetails",
@@ -52,10 +52,11 @@ export function useBotList () {
   const { data = [], isLoading } = useQuery<Bot[]>({
     queryKey: ['botList'],
     enabled: !!tokens.length && !!library,
+    refetchOnMount: true,
     queryFn: async () => {
-      const address = '0xDa3f4f092219601488B58352ed13B3dcDf457bF5';
+      const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
       const signer = library.getSigner();
-      const contract = new Contract(address, abi, signer);
+      const contract = new Contract(address, STRATEX_ABI, signer);
       const data = await contract.connect(signer).getBotsDetails();
 
       if (!data) {
@@ -68,9 +69,9 @@ export function useBotList () {
         id: '1', // TODO: get from contract
         amount: data ? parseFloat(formatEther(data._amount)) : 0,
         createdAt: new Date().toISOString(), // TODO: get from contract
-        lowerRange: data?._lower_range,
-        upperRange: data?._upper_range,
-        grids: data?._no_of_grids,
+        lowerRange: parseFloat(formatEther(data?._lower_range)),
+        upperRange: parseFloat(formatEther(data?._upper_range)),
+        grids: parseInt(formatEther(data?._no_of_grids), 10),
         token: tokenIn,
         tokenPair: tokenOut,
       };

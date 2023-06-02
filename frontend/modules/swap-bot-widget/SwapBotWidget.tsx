@@ -45,7 +45,9 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
     price: selectedTargetTokenPrice,
     isLoading: selectedTargetTokenPriceLoading,
   } = useTokenPrice(selectedTargetToken);
-  const createBot = useCreateBot();
+  const createBot = useCreateBot({
+    onSuccess: onCancel,
+  });
 
   const selectedTokenImg = selectedToken?.logoURI;
   const selectedTargetTokenImg = selectedTargetToken?.logoURI;
@@ -53,7 +55,8 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const balance = balanceData ? formatEther(balanceData).toString() : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
   const insufficientBalance = balanceData && parseEther(`0${amountToSwap}`).gt(balanceData);
-  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance;
+  const isSameToken = selectedToken?.address === selectedTargetToken?.address;
+  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance && !isSameToken;
 
   const isLoading = !selectedToken;
 
@@ -74,15 +77,15 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
 
   if (isLoading) return null;
 
-  const handleOnSubmit = async () => {
+  const handleOnSubmit = () => {
     try {
       createBot({
         amount: parseEther(amountToSwap),
         grids: Number(grids),
         lowerRange: lowerRange ? Number(lowerRange) : 0,
         upperRange: upperRange ? Number(upperRange) : 0,
+        tokenIn: selectedToken.address,
       });
-      onCancel();
     } catch (error) {
       console.error(error);
     }
@@ -190,6 +193,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
             {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
             {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
             {insufficientBalance && 'Insufficient Balance'}
+            {isSameToken && 'Select Different Token'}
             {isSubmitEnabled && 'Create Bot Now'}
           </Button>}
         </Stack>

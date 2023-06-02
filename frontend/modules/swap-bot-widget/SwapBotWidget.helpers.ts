@@ -5,14 +5,64 @@ import { Contract } from "@ethersproject/contracts";
 import { toast } from "react-toastify";
 import { parseEther } from "@ethersproject/units";
 
-interface UseCreateBotParams {
+interface UseCreateBotMutateParams {
   upperRange: number;
   lowerRange: number; 
   grids: number;
   amount: BigNumber;
+  tokenIn: string;
 }
 
-const abi = [
+const ERC20_ABI = [
+  {
+    "constant": false,
+    "inputs": [
+        {
+            "name": "guy",
+            "type": "address"
+        },
+        {
+            "name": "wad",
+            "type": "uint256"
+        }
+    ],
+    "name": "approve",
+    "outputs": [
+        {
+            "name": "",
+            "type": "bool"
+        }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+        {
+            "name": "",
+            "type": "address"
+        },
+        {
+            "name": "",
+            "type": "address"
+        }
+    ],
+    "name": "allowance",
+    "outputs": [
+        {
+            "name": "",
+            "type": "uint256"
+        }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+]
+
+const STRATEX_ABI = [
   {
     "inputs": [
       {
@@ -43,25 +93,35 @@ const abi = [
   },
 ]
 
-export function useCreateBot() {
-  const { library } = useWeb3React();
+interface UseCreateBotParams {
+  onSuccess: () => void;
+}
+
+export function useCreateBot({ onSuccess }: UseCreateBotParams) {
+  const { library, account } = useWeb3React();
 
   const { mutate } = useMutation({
     mutationKey: ['createBot'],
+    onSuccess,
     mutationFn: async ({
-      upperRange, lowerRange, grids, amount
-    }: UseCreateBotParams) => {
+      upperRange, lowerRange, grids, amount, tokenIn
+    }: UseCreateBotMutateParams) => {
       const toastId = toast.loading('Creating bot...');
-      const address = '0xDa3f4f092219601488B58352ed13B3dcDf457bF5';
+      const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
       const signer = library.getSigner();
-      const contract = new Contract(address, abi, signer);
-
+      const tokenContract = new Contract(tokenIn, ERC20_ABI, signer);
+      
       try {
+        await tokenContract.connect(signer).approve(address, amount);
+
+        const allowedAmount = await tokenContract.connect(signer).allowance(account, address);
+
+        const contract = new Contract(address, STRATEX_ABI, signer);
         const result = await contract.connect(signer).CreateBot(
-          BigNumber.from(parseEther(upperRange.toString())), 
-          BigNumber.from(parseEther(lowerRange.toString())), 
+          BigNumber.from(parseEther(upperRange.toString())),
+          BigNumber.from(parseEther(lowerRange.toString())),
           BigNumber.from(parseEther(grids.toString())),
-          amount
+          allowedAmount
         );
   
         toast.update(toastId, { 

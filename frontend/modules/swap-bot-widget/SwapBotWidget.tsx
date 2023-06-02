@@ -26,7 +26,7 @@ interface SwapBotWidgetProps {
 export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const { account, chainId } = useWeb3React<Web3Provider>();
   const tokens = useTokenList(chainId);
-  const wethToken = tokens.find(token => token.symbol === 'WETH'); 
+  const defaultToken = tokens.find(token => token.symbol === 'WMATIC'); 
   const [selectedToken, setSelectedToken] = useState<Token>();
   const balanceData = useBalance(account, selectedToken?.address);
   const [selectedTokenModalOpen, setSelectedTokenModalOpen] = useState<boolean>(false);
@@ -61,10 +61,10 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const isLoading = !selectedToken;
 
   useEffect(() => {
-    if (wethToken && !selectedToken) {
-      setSelectedToken(wethToken);
+    if (defaultToken && !selectedToken) {
+      setSelectedToken(defaultToken);
     }
-  }, [selectedToken, wethToken])
+  }, [selectedToken, defaultToken])
 
   useEffect(() => {
     setLowerRange(
@@ -103,7 +103,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
           <Typography variant="h5" mb={2}>
             Create a Bot
           </Typography>
-          <TextField value={amountToSwap} onChange={(e) => setAmountToSwap(e.target.value ?? '0')} variant="outlined" label="Amount to Swap" InputProps={{
+          <TextField value={amountToSwap} onChange={(e) => setAmountToSwap(e.target.value ?? '0')} variant="outlined" label="Amount to Invest" InputProps={{
             endAdornment: (
               <Button color="inherit" startIcon={
                 <Box
@@ -131,7 +131,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
             <Stack spacing={1}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Typography variant="caption">
-                  Swapping Pair:
+                  Trading Pair:
                 </Typography>
                 <Button sx={{ justifyContent: 'flex-start' }} variant="outlined" color="primary" startIcon={
                   <Box
@@ -164,7 +164,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
           }
           {!selectedTargetToken && 
             <Button variant="outlined" color="primary" onClick={() => setSelectedTargetTokenModalOpen(true)}>
-              Select Target Token for Swap
+              Select Target Token for Trade
             </Button>
           }
           {selectedTargetToken && 

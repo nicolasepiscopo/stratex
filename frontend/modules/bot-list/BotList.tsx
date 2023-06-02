@@ -40,7 +40,7 @@ export function BotList ({ bots, onCreateBot }: BotListProps) {
       </Stack>
       <List>
         {bots.map((bot) => {
-          const primary = `${bot.amount} ${bot.token.symbol} to ${bot.tokenPair.symbol}`;
+          const primary = <>{bot.amount} {bot.token.symbol} ➟ {bot.tokenPair.symbol}</>;
           const secondary = `${bot.grids} Grids between $${bot.lowerRange} and $${bot.upperRange}`;
 
           return (

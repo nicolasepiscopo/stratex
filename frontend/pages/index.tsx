@@ -53,6 +53,7 @@ function Home() {
                 width={isSmallScreen ? "400" : "700"}
                 height={isSmallScreen ? "200" : "400"}
                 style={{ borderRadius: '5px' }}
+                unoptimized
               />
             </Box>
           </Box>

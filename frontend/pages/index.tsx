@@ -47,14 +47,22 @@ function Home() {
               Welcome to StratEx, the application that allows you to perform automated decentralized transactions with smart contracts using buy and sell limits and grids on the blockchain. With StratEx, you can make the most of your trades and get the best results quickly and easily. Our intuitive and user-friendly interface allows you to set your own buy and sell limits to get the best possible price.
             </Typography>
             <Box py={6} textAlign="center">
-              <Image 
+              {isSmallScreen && <Image 
                 alt="StratEx Trade"
                 src="/trade.gif"
-                width={isSmallScreen ? "400" : "700"}
-                height={isSmallScreen ? "200" : "400"}
+                width="350"
+                height="150"
                 style={{ borderRadius: '5px' }}
                 unoptimized
-              />
+              />}
+              {!isSmallScreen && <Image 
+                alt="StratEx Trade"
+                src="/trade.gif"
+                width="700"
+                height="400"
+                style={{ borderRadius: '5px' }}
+                unoptimized
+              />}
             </Box>
           </Box>
         </Stack>

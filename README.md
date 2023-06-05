@@ -11,6 +11,8 @@ We found that this kind of bot is only available on centralized exchanges like B
 ## What it does
 Our bot takes user input for the amount to spend, the upper and lower ranges to operate within, and the specific points between those limits to either purchase or sell the base token against a stablecoin.
 
+![Architecture](./docs/architecture.png)
+
 ## How we built it
 - Chainlink services and Uniswap are the primary implementations of this hackathon. Chainlink Automation is used to determine when a buy or sell (swap) operation should be triggered based on a calculation using the price of the base token pair against the dollar, provided by Chainlink Price Feed.
 - We built a "bot" smart contract to operate in a decentralized manner, connected to the checkUpkeep and performUpkeep Chainlink automation functions. [Contract Source Code](https://github.com/nicolasepiscopo/stratex/blob/main/backend/contracts/TradeBot.sol)

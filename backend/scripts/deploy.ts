@@ -1,24 +1,48 @@
-import { ethers } from "hardhat";
+import { DeployFunction } from "hardhat-deploy/types"
+import { network } from "hardhat"
+import {
+    networkConfig,
+    developmentChains,
+    VERIFICATION_BLOCK_CONFIRMATIONS,
+} from "../helper-hardhat-config"
+import { verify } from "../helper-functions"
 
-async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+const deployFunction: DeployFunction = async ({ getNamedAccounts, deployments, getChainId }) => {
+    const { deploy, log } = deployments
 
-  const lockedAmount = ethers.utils.parseEther("0.001");
+    const { deployer } = await getNamedAccounts()
+    const chainId: number | undefined = network.config.chainId
+    if (!chainId) return
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+    const waitBlockConfirmations: number = developmentChains.includes(network.name)
+        ? 1
+        : VERIFICATION_BLOCK_CONFIRMATIONS
+    // const args = [keepersUpdateInterval]
+    const args = []
+    const tradeBot = await deploy("TradeBot", {
+        from: deployer,
+        // args: args,
+        log: true,
+        waitConfirmations: waitBlockConfirmations,
+    })
 
-  await lock.deployed();
+    if (!developmentChains.includes(network.name) && process.env.POLYGONSCAN_API_KEY) {
+        log("Verifying...")
+        // await verify(tradeBot.address, args)
+        await verify(tradeBot.address, [])
+    }
 
-  console.log(
-    `Lock with ${ethers.utils.formatEther(lockedAmount)}ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+    log(
+        "Head to https://keepers.chain.link/ to register your contract for upkeeps. Then run the following command to track the counter updates: "
+    )
+    const networkName = network.name == "hardhat" ? "localhost" : network.name
+    log(
+        `yarn hardhat read-keepers-counter --contract ${tradeBot.address} --network ${networkName}`
+    )
+    log("----------------------------------------------------")
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
+deployFunction().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

@@ -51,9 +51,10 @@ contract SingleSwap is AutomationCompatibleInterface {
         OrderType orderType;
     }
  
-    //Bot ID => breachIndex => isbreached
-    mapping(uint256 => mapping(uint256 => bool)) breachedBotGrids;
-    mapping(uint256 => mapping(uint256 => uint256)) boughtBotAmounts;
+    // Bot ID => breachIndex => isbreached
+    mapping(uint256 => mapping(uint256 => bool)) public breachedBotGrids;
+    // Bot ID => breachIndex => amount buy ordered
+    mapping(uint256 => mapping(uint256 => uint256)) public boughtBotAmounts;
 
     mapping(address => uint256) public balanceWMATIC;
     mapping(address => uint256)  public balanceWETH;
@@ -67,15 +68,14 @@ contract SingleSwap is AutomationCompatibleInterface {
     event OrderExecuted(OrderType ordertype, uint256 gridIndex, uint256 qty , uint256 price);
     event BytesFailure(bytes bytesFailure);
     event StringFailure(string stringFailure);
-    event Test(uint256 test, uint256 test2, OrderType ordertype);
 
     // For this example, we will set the pool fee to 0.3%.
     uint24 public constant poolFee = 3000;
 
-    function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount, uint256 currentPrice) public {
-        // uint256 currentPrice = getScaledPrice();
-        // require(currentPrice >= _lower_range, "current price should be greater than lower range");
-        // IERC20(WMATIC).transferFrom(msg.sender, address(this), _amount);
+    function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount) public {
+        uint256 currentPrice = getScaledPrice();
+        require(currentPrice >= _lower_range, "current price should be greater than lower range");
+        IERC20(WMATIC).transferFrom(msg.sender, address(this), _amount);
         balanceWMATIC[msg.sender] += _amount;
         uint256[] memory grids;
         Bot memory newBot = Bot({
@@ -106,17 +106,12 @@ contract SingleSwap is AutomationCompatibleInterface {
         return bots[_botIndex].grids;
     }
 
-    function getGrids2(uint256 _botIndex, uint256 _grid) public view returns (uint256 gridd) {
-        return bots[_botIndex].grids[_grid];
-    }
-
     constructor() {
         priceFeed = AggregatorV3Interface(
             0x0715A7794a1dc8e42615F059dD6e406A6594651A // ETH-USD in Mumbai Testnet
         );
     }
 
-    // ** modify to internal after tests
     function calculateGrid(uint256[] memory grids, uint256 _currentPrice) public pure returns (uint256 _currentGrid) {
         // Add grid below lower range (0) and upper range (grids.length + 1)
         for (uint256 i = 0; i < grids.length; i++) {
@@ -126,42 +121,31 @@ contract SingleSwap is AutomationCompatibleInterface {
         }
     }
 
-    function checkUpkeep(bytes calldata checkData) external view override returns (bool upkeepNeeded, bytes memory performData)
+    function checkUpkeep(bytes calldata /*checkData*/) external view override returns (bool upkeepNeeded, bytes memory performData)
     {
         PerformData[] memory performDataUnencoded = new PerformData[](botCounter); // for each botId related the PerfomData
         upkeepNeeded = false;
 
-        (uint256 price) = abi.decode(
+        /*(uint256 price) = abi.decode(
             checkData,
             (uint256)
-        );
+        );*/
 
-        // uint price = getScaledPrice();
+        uint256 price = getScaledPrice();
         for (uint256 i = 0; i < botCounter; i++) {
             if (bots[i].upper_range == 0) continue; // bots[] can be deleted so to avoid processing empty voids we put this control
             uint256 newGrid = calculateGrid(bots[i].grids, price);
-            if((bots[i].buyCounter - bots[i].sellCounter) == 1 && newGrid > bots[i].currentGrid) {
-                if ( bots[i].sellCounter > 0) {
-                    // put sell order. If 0, it means that the bot has not started yet (any buy order placed)
-                    performDataUnencoded[i] = PerformData(i, newGrid, OrderType.SellOrder);
+            if ((newGrid < bots[i].currentGrid) && !breachedBotGrids[i][bots[i].currentGrid-1]){
+                performDataUnencoded[i] = PerformData(i, newGrid, OrderType.BuyOrder); // queue buy order
+                upkeepNeeded = true;
+            }else if ((newGrid > bots[i].currentGrid) && (newGrid > 1) && breachedBotGrids[i][newGrid-2]){
+                performDataUnencoded[i] = PerformData(i, newGrid, OrderType.SellOrder);
+                upkeepNeeded = true; 
+            } else {
+                if (newGrid != bots[i].currentGrid) {
+                    performDataUnencoded[i] = PerformData(i, newGrid, OrderType.UpdateCurrentGrid);
                     upkeepNeeded = true;
                 }
-            }
-            if((bots[i].buyCounter - bots[i].sellCounter) > 0 && newGrid > (bots[i].currentGrid + 1)) { // if price go up fast => sell
-                if ( bots[i].buyCounter > 0) {
-                    // put sell order. If 0, it means that the bot has not started yet (any buy order placed)
-                    performDataUnencoded[i] = PerformData(i, newGrid, OrderType.SellOrder);
-                    upkeepNeeded = true;
-                }
-            }
-            if(newGrid < bots[i].currentGrid) {
-                // put buy order
-                performDataUnencoded[i] = PerformData(i, newGrid, OrderType.BuyOrder);
-                upkeepNeeded = true;
-            }
-            if (!upkeepNeeded && newGrid != bots[i].currentGrid) {
-                performDataUnencoded[i] = PerformData(i, newGrid, OrderType.UpdateCurrentGrid);
-                upkeepNeeded = true;
             }
         }
         if (upkeepNeeded) performData = abi.encode(performDataUnencoded);
@@ -175,9 +159,9 @@ contract SingleSwap is AutomationCompatibleInterface {
         for (uint256 i = 0; i < performDataDecoded.length; i++) {
             PerformData memory performDataIndividual = performDataDecoded[i];
             uint256 botId = performDataIndividual.botId;
-            uint256 breachIndex = performDataIndividual.breachIndex;
+            // if number of grid are 5, it means that we could have grids from 0 to 6
+            uint256 breachIndex = performDataIndividual.breachIndex; 
             OrderType orderType = performDataIndividual.orderType;
-            // emit Test(botId, breachIndex, orderType);
             Bot storage bot = bots[botId];
             if(orderType == OrderType.BuyOrder) {
                 // BUY
@@ -186,19 +170,27 @@ contract SingleSwap is AutomationCompatibleInterface {
                 balanceWMATIC[bot.user] -= amountToSwap;
                 balanceWETH[bot.user] += qty;
                 bot.buyCounter++;
+                breachedBotGrids[botId][breachIndex] = true;
+                boughtBotAmounts[botId][breachIndex] = qty; // store WETH that bot has gathered as a profit swap
+                bot.currentGrid = breachIndex;
                 emit OrderExecuted(orderType, breachIndex, qty, price);
             }
             if(orderType == OrderType.SellOrder) {
                 // SELL
-                uint256 amountToSwap = (balanceWETH[bot.user] * balanceToSpentBPS) / 10000;
+                uint256 amountToSwap = boughtBotAmounts[botId][breachIndex - 2];
                 uint256 qty = swapExactInputSingle(amountToSwap, WMATIC, WETH);
                 balanceWMATIC[bot.user] += amountToSwap;
                 balanceWETH[bot.user] -= qty;
                 bot.sellCounter++;
+                delete breachedBotGrids[botId][breachIndex - 2];
+                delete boughtBotAmounts[botId][breachIndex - 2];
+                bot.currentGrid = breachIndex;
                 emit OrderExecuted(orderType, breachIndex, qty, price);
             }
+            if (orderType == OrderType.UpdateCurrentGrid) {
+                bot.currentGrid = breachIndex;
+            }
             bot.lastExecutionTime = block.timestamp;
-            bot.currentGrid = breachIndex;
         }
     }
 
@@ -224,17 +216,7 @@ contract SingleSwap is AutomationCompatibleInterface {
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             });
-
-       //amountOut = swapRouter.exactInputSingle(params);
-       try swapRouter.exactInputSingle(params) returns (uint256 _value) {
-           // Successful execution, proceed with the rest of the code
-           return (_value);
-       } catch Error(string memory _err) {
-           emit StringFailure(_err);
-       }
-       catch (bytes memory error) {
-           emit BytesFailure(error);
-       }
+        amountOut = swapRouter.exactInputSingle(params);
     }
     
     function withdrawWmatic(uint256 _amount) public {

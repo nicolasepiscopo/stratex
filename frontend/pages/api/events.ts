@@ -39,7 +39,7 @@ const abi = [
 ]
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const address = '0x42AF787924287dA64a74D095517d130EAE5cDac9';
+  const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
   const provider = new JsonRpcProvider(
     process.env.ALCHEMY_RPC
   );

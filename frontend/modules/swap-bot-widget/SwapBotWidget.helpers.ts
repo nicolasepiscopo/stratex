@@ -3,7 +3,6 @@ import { useWeb3React } from "@web3-react/core";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contract } from "@ethersproject/contracts";
 import { toast } from "react-toastify";
-import { parseEther } from "@ethersproject/units";
 
 interface UseCreateBotMutateParams {
   upperRange: number;
@@ -112,30 +111,36 @@ export function useCreateBot({ onSuccess }: UseCreateBotParams) {
       const tokenContract = new Contract(tokenIn, ERC20_ABI, signer);
       
       try {
-        await tokenContract.connect(signer).approve(address, amount);
+        const approveTx = await tokenContract.connect(signer).approve(address, amount);
+
+        await signer.provider?.waitForTransaction(approveTx.hash, 1, 100000);
 
         const allowedAmount = await tokenContract.connect(signer).allowance(account, address);
 
         const contract = new Contract(address, STRATEX_ABI, signer);
-        const result = await contract.connect(signer).CreateBot(
-          BigNumber.from(parseEther(upperRange.toString())),
-          BigNumber.from(parseEther(lowerRange.toString())),
-          BigNumber.from(parseEther(grids.toString())),
+        const createBotTx = await contract.connect(signer).CreateBot(
+          BigNumber.from(upperRange.toString()),
+          BigNumber.from(lowerRange.toString()),
+          BigNumber.from(grids.toString()),
           allowedAmount
         );
+
+        await signer.provider?.waitForTransaction(createBotTx.hash, 1, 100000);
   
         toast.update(toastId, { 
           render: "Bot created successfully!", 
           type: "success", 
-          isLoading: false 
+          isLoading: false,
+          autoClose: 3000
         });
 
-        return result;
+        return createBotTx;
       } catch (e) {
         toast.update(toastId, { 
           render: "Failed to create bot. Please try again.", 
           type: "error",
-          isLoading: false 
+          isLoading: false,
+          autoClose: 3000
         });
         throw e;
       }

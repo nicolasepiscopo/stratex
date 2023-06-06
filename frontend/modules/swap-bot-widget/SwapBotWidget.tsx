@@ -68,10 +68,10 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
 
   useEffect(() => {
     setLowerRange(
-      selectedTargetTokenPrice ? (selectedTargetTokenPrice / 1.10).toFixed(4) : ''
+      selectedTargetTokenPrice ? (selectedTargetTokenPrice / 1.10).toFixed(0) : ''
     );
     setUpperRange(
-      selectedTargetTokenPrice ? (selectedTargetTokenPrice * 1.10).toFixed(4) : ''
+      selectedTargetTokenPrice ? (selectedTargetTokenPrice * 1.10).toFixed(0) : ''
     );
   }, [selectedTargetTokenPrice]);
 
@@ -147,7 +147,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
                   endIcon={selectedTargetTokenPriceLoading && <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />}
                 >
                   {selectedTargetToken.symbol} 
-                  {!!selectedTargetTokenPrice && ` ~$${selectedTargetTokenPrice.toFixed(4)}`}
+                  {!!selectedTargetTokenPrice && ` ~$${selectedTargetTokenPrice.toFixed(0)}`}
                 </Button>
               </Stack>
               {/* {!!targetCoinsQty && selectedTargetTokenPrice && 
@@ -184,8 +184,8 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
               </Select>
             </Stack>
             <Stack direction="row" spacing={1}>
-              <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => setLowerRange(e.target.value)} />
-              <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
+              <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => !e.target.value.includes('.') && setLowerRange(e.target.value)} />
+              <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => !e.target.value.includes('.') && setUpperRange(e.target.value)} />
             </Stack>
           </>}
           {selectedTargetToken && <Button size="large" variant={isSubmitEnabled ? "contained" : "outlined"} color="primary" disabled={!isSubmitEnabled} onClick={handleOnSubmit}>

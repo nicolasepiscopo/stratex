@@ -69,9 +69,9 @@ export function useBotList () {
         id: '1', // TODO: get from contract
         amount: data ? parseFloat(formatEther(data._amount)) : 0,
         createdAt: new Date().toISOString(), // TODO: get from contract
-        lowerRange: parseFloat(formatEther(data?._lower_range)),
-        upperRange: parseFloat(formatEther(data?._upper_range)),
-        grids: parseInt(formatEther(data?._no_of_grids), 10),
+        lowerRange: data?._lower_range,
+        upperRange: data?._upper_range,
+        grids: data?._no_of_grids,
         token: tokenIn,
         tokenPair: tokenOut,
       };

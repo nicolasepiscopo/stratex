@@ -19,7 +19,7 @@ interface IERC20 {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
-contract SingleSwap is AutomationCompatibleInterface {
+contract StratEx is AutomationCompatibleInterface {
 
     AggregatorV3Interface internal priceFeed;
     address public constant routerAddress = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
@@ -202,13 +202,8 @@ contract SingleSwap is AutomationCompatibleInterface {
     }
 
 
-    function swapExactInputSingle(uint256 amountIn, address tin , address tout) public payable returns (uint256 amountOut)
+    function swapExactInputSingle(uint256 amountIn, address tin , address tout) internal returns (uint256 amountOut)
     {
-        /* if (isBuyOrder) {
-            IERC20(tin).approve(address(swapRouter), amountIn);
-        } else {
-            IERC20(tout).approve(address(swapRouter), amountIn);
-        }*/
         IERC20(tin).approve(address(swapRouter), amountIn);
 
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter

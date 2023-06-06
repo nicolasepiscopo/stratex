@@ -1,4 +1,4 @@
-<p style="text-align: center">
+<p align="center">
   <img src="./docs/logo_transp_bg.png" alt="StratEx" style="width: 250px">
 </p>
 

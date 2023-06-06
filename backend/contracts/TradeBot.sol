@@ -61,11 +61,7 @@ contract SingleSwap is AutomationCompatibleInterface {
     // Bot ID => token address => amount
     mapping(uint256 => mapping (address => uint256)) public balances;
 
-    uint256 private interval = 60;
-
     event OrderExecuted(OrderType ordertype, uint256 gridIndex, uint256 qty , uint256 price);
-    event BytesFailure(bytes bytesFailure);
-    event StringFailure(string stringFailure);
 
     // For this example, we will set the pool fee to 0.3%.
     uint24 public constant poolFee = 3000;
@@ -133,7 +129,7 @@ contract SingleSwap is AutomationCompatibleInterface {
 
         uint256 price = getScaledPrice();
         for (uint256 i = 0; i < botCounter; i++) {
-            if (bots[i].upper_range == 0) continue; // bots[] can be deleted so to avoid processing empty voids we put this control
+            if (bots[i].upper_range == 0 || bots[i].isCancelled) continue; // bots[] can be deleted so to avoid processing empty voids we put this control
             uint256 newGrid = calculateGrid(bots[i].grids, price);
             if ((newGrid < bots[i].currentGrid) && !breachedBotGrids[i][bots[i].currentGrid-1]){
                 performDataUnencoded[i] = PerformData(i, newGrid, OrderType.BuyOrder); // queue buy order

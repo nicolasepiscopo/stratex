@@ -37,6 +37,8 @@ contract SingleSwap is AutomationCompatibleInterface {
         uint256 sellCounter;
         uint256 lastExecutionTime;
         bool isCancelled;
+        address tokenIn;
+        address tokenOut;
     }
     Bot[] public bots;
     uint256 public botCounter = 0;
@@ -56,14 +58,10 @@ contract SingleSwap is AutomationCompatibleInterface {
     // Bot ID => breachIndex => amount buy ordered
     mapping(uint256 => mapping(uint256 => uint256)) public boughtBotAmounts;
 
-    mapping(address => uint256) public balanceWMATIC;
-    mapping(address => uint256)  public balanceWETH;
+    // Bot ID => token address => amount
+    mapping(uint256 => mapping (address => uint256)) public balances;
 
     uint256 private interval = 60;
-
-
-    address public constant WMATIC = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889; // Polygon Network :
-    address public constant WETH = 0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa; // Polygon Network
 
     event OrderExecuted(OrderType ordertype, uint256 gridIndex, uint256 qty , uint256 price);
     event BytesFailure(bytes bytesFailure);
@@ -72,11 +70,11 @@ contract SingleSwap is AutomationCompatibleInterface {
     // For this example, we will set the pool fee to 0.3%.
     uint24 public constant poolFee = 3000;
 
-    function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount) public {
+    function CreateBot(uint256 _upper_range , uint256 _lower_range, uint256 _no_of_grids, uint256 _amount, address tokenIn, address tokenOut) public {
         uint256 currentPrice = getScaledPrice();
         require(currentPrice >= _lower_range, "current price should be greater than lower range");
-        IERC20(WMATIC).transferFrom(msg.sender, address(this), _amount);
-        balanceWMATIC[msg.sender] += _amount;
+        IERC20(tokenIn).transferFrom(msg.sender, address(this), _amount);
+        balances[botCounter + 1][tokenIn] += _amount;
         uint256[] memory grids;
         Bot memory newBot = Bot({
             user: msg.sender,
@@ -87,7 +85,9 @@ contract SingleSwap is AutomationCompatibleInterface {
             buyCounter: 0,
             sellCounter: 0,
             lastExecutionTime: block.timestamp,
-            isCancelled: false
+            isCancelled: false,
+            tokenIn: tokenIn,
+            tokenOut: tokenOut
         });       
         bots.push(newBot);
         uint256 dist = (_upper_range - _lower_range) / _no_of_grids;
@@ -165,10 +165,10 @@ contract SingleSwap is AutomationCompatibleInterface {
             Bot storage bot = bots[botId];
             if(orderType == OrderType.BuyOrder) {
                 // BUY
-                uint256 amountToSwap = (balanceWMATIC[bot.user] * balanceToSpentBPS) / 10000;
-                uint256 qty = swapExactInputSingle(amountToSwap, WMATIC, WETH);
-                balanceWMATIC[bot.user] -= amountToSwap;
-                balanceWETH[bot.user] += qty;
+                uint256 amountToSwap = (balances[i][bot.tokenIn] * balanceToSpentBPS) / 10000;
+                uint256 qty = swapExactInputSingle(amountToSwap, bot.tokenIn, bot.tokenOut, true);
+                balances[i][bot.tokenIn] -= amountToSwap;
+                balances[i][bot.tokenOut] += qty;
                 bot.buyCounter++;
                 breachedBotGrids[botId][breachIndex] = true;
                 boughtBotAmounts[botId][breachIndex] = qty; // store WETH that bot has gathered as a profit swap
@@ -178,9 +178,9 @@ contract SingleSwap is AutomationCompatibleInterface {
             if(orderType == OrderType.SellOrder) {
                 // SELL
                 uint256 amountToSwap = boughtBotAmounts[botId][breachIndex - 2];
-                uint256 qty = swapExactInputSingle(amountToSwap, WMATIC, WETH);
-                balanceWMATIC[bot.user] += amountToSwap;
-                balanceWETH[bot.user] -= qty;
+                uint256 qty = swapExactInputSingle(amountToSwap, bot.tokenIn, bot.tokenOut, false);
+                balances[i][bot.tokenIn] += amountToSwap;
+                balances[i][bot.tokenOut] -= qty;
                 bot.sellCounter++;
                 delete breachedBotGrids[botId][breachIndex - 2];
                 delete boughtBotAmounts[botId][breachIndex - 2];
@@ -195,14 +195,12 @@ contract SingleSwap is AutomationCompatibleInterface {
     }
 
 
-    function swapExactInputSingle(uint256 amountIn, address tin , address tout) public payable returns (uint256 amountOut)
+    function swapExactInputSingle(uint256 amountIn, address tin , address tout, bool isBuyOrder) public payable returns (uint256 amountOut)
     {
-        if (tin == WMATIC) {
-            // Approve the router to spend DAI.
-            // TransferHelper.safeApprove(WMATIC, address(swapRouter), amountIn);
-            IERC20(WMATIC).approve(address(swapRouter), amountIn);
+        if (isBuyOrder) {
+            IERC20(tin).approve(address(swapRouter), amountIn);
         } else {
-            IERC20(WETH).approve(address(swapRouter), amountIn);
+            IERC20(tout).approve(address(swapRouter), amountIn);
         }
 
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
@@ -219,18 +217,12 @@ contract SingleSwap is AutomationCompatibleInterface {
         amountOut = swapRouter.exactInputSingle(params);
     }
     
-    function withdrawWmatic(uint256 _amount) public {
-        require(balanceWMATIC[msg.sender] >= _amount, "Insufficient balance");
-        require(IERC20(WMATIC).balanceOf(address(this)) >= _amount, "Insufficient balance");        
-        IERC20(WMATIC).transfer(msg.sender, _amount);
-        balanceWMATIC[msg.sender] -= _amount;
-    }
-
-    function withdrawWeth(uint256 _amount) public {
-        require(balanceWETH[msg.sender] >= _amount, "Insufficient balance");
-        require(IERC20(WETH).balanceOf(address(this)) >= _amount, "Insufficient balance");        
-        IERC20(WETH).transfer(msg.sender, _amount);
-        balanceWETH[msg.sender] -= _amount;
+    function withdraw(uint256 _amount, uint256 botId, address token) public {
+        require(msg.sender == bots[botId].user, "Only owner can withdraw");
+        require(balances[botId][token] >= _amount, "Insufficient balance");
+        require(IERC20(token).balanceOf(address(this)) >= _amount, "Insufficient balance");        
+        IERC20(token).transfer(msg.sender, _amount);
+        balances[botId][token] -= _amount;
     }
 
     function getDecimals() public view returns (uint8) {

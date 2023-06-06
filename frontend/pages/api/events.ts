@@ -46,6 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const contract = new Contract(address, abi, provider);
 
   const logs = await contract.provider.getLogs({
+    address,
     fromBlock: 0,
     toBlock: 'latest',
     topics: [id('GridBreached(uint256,bool,uint256,uint256)')]

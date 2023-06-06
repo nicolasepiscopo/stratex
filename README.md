@@ -1,3 +1,7 @@
+<p style="text-align: center">
+  <img src="./docs/logo_transp_bg.png" alt="StratEx" style="width: 250px">
+</p>
+
 # Stratex
 Automated Decentralized Bot for trading at different limits and ranges, depending on customer requirements.
 

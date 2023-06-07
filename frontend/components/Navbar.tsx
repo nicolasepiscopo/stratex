@@ -12,18 +12,13 @@ import Typography from "@mui/material/Typography";
 import Image from "next/image";
 import { useState } from "react";
 import Account from "./Account";
-import { useWeb3React } from "@web3-react/core";
 import { useRouter } from "next/router";
 
-const pages = ['Products', 'Pricing', 'Blog'];
+const pages = [];
 
 export function Navbar () {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const router = useRouter();
-
-  const { account } =
-    useWeb3React();
-  const isConnected = typeof account === "string";
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -34,7 +29,7 @@ export function Navbar () {
   };
 
   const logo = <Image
-    alt="stratex"
+    alt="StratEx"
     src={'/logo.png'}
     width={48}
     height={48}
@@ -48,10 +43,13 @@ export function Navbar () {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ justifyContent: 'space-between'}}>
-          <ButtonBase disableRipple onClick={handleOnClickLogo} sx={{ display: { md: 'flex', xs: 'none' }, mr: 4 }}>
+          <ButtonBase disableRipple onClick={handleOnClickLogo} sx={{ 
+            // display: { md: 'flex', xs: 'none' }, 
+            mr: 4 
+          }}>
             {logo}
           </ButtonBase>
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+          {pages.length > 0 && <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -81,20 +79,20 @@ export function Navbar () {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem color="secondary" key={page} onClick={handleCloseNavMenu}>
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
             </Menu>
-          </Box>
-          {isConnected &&
-          <Box sx={{ flexGrow: 1, justifyContent: 'center', display: { xs: 'flex', md: 'none' }, mr: 1 }}>
-            {logo}
           </Box>}
+          {/* <Box sx={{ flexGrow: 1, justifyContent: 'center', display: { xs: 'flex', md: 'none' }, mr: 1 }}>
+            {logo}
+          </Box> */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
                 key={page}
+                color="secondary"
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >

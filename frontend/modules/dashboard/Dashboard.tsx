@@ -26,13 +26,13 @@ export default function Dashboard () {
   return (
     <Box>
       <Head>
-        <title>StrateX - App</title>
+        <title>StratEx - App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container maxWidth="xl">
         {isLoading && (
           <Stack justifyContent="center" alignItems="center" sx={{ position: 'absolute', top: 0, left: 0, bottom: '70vh', right: 0 }}>
-            <CircularProgress />
+            <CircularProgress color="secondary" />
           </Stack>
         )}
         {!isLoading && (

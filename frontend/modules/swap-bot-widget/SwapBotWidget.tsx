@@ -26,7 +26,7 @@ interface SwapBotWidgetProps {
 export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const { account, chainId } = useWeb3React<Web3Provider>();
   const tokens = useTokenList(chainId);
-  const wethToken = tokens.find(token => token.symbol === 'WETH'); 
+  const defaultToken = tokens.find(token => token.symbol === 'WMATIC'); 
   const [selectedToken, setSelectedToken] = useState<Token>();
   const balanceData = useBalance(account, selectedToken?.address);
   const [selectedTokenModalOpen, setSelectedTokenModalOpen] = useState<boolean>(false);
@@ -45,7 +45,9 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
     price: selectedTargetTokenPrice,
     isLoading: selectedTargetTokenPriceLoading,
   } = useTokenPrice(selectedTargetToken);
-  const createBot = useCreateBot();
+  const createBot = useCreateBot({
+    onSuccess: onCancel,
+  });
 
   const selectedTokenImg = selectedToken?.logoURI;
   const selectedTargetTokenImg = selectedTargetToken?.logoURI;
@@ -53,36 +55,37 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const balance = balanceData ? formatEther(balanceData).toString() : 0;
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
   const insufficientBalance = balanceData && parseEther(`0${amountToSwap}`).gt(balanceData);
-  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance;
+  const isSameToken = selectedToken?.address === selectedTargetToken?.address;
+  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance && !isSameToken;
 
   const isLoading = !selectedToken;
 
   useEffect(() => {
-    if (wethToken && !selectedToken) {
-      setSelectedToken(wethToken);
+    if (defaultToken && !selectedToken) {
+      setSelectedToken(defaultToken);
     }
-  }, [selectedToken, wethToken])
+  }, [selectedToken, defaultToken])
 
   useEffect(() => {
     setLowerRange(
-      selectedTargetTokenPrice ? (selectedTargetTokenPrice / 1.10).toFixed(4) : ''
+      selectedTargetTokenPrice ? (selectedTargetTokenPrice / 1.10).toFixed(0) : ''
     );
     setUpperRange(
-      selectedTargetTokenPrice ? (selectedTargetTokenPrice * 1.10).toFixed(4) : ''
+      selectedTargetTokenPrice ? (selectedTargetTokenPrice * 1.10).toFixed(0) : ''
     );
   }, [selectedTargetTokenPrice]);
 
   if (isLoading) return null;
 
-  const handleOnSubmit = async () => {
+  const handleOnSubmit = () => {
     try {
       createBot({
         amount: parseEther(amountToSwap),
         grids: Number(grids),
         lowerRange: lowerRange ? Number(lowerRange) : 0,
         upperRange: upperRange ? Number(upperRange) : 0,
+        tokenIn: selectedToken.address,
       });
-      onCancel();
     } catch (error) {
       console.error(error);
     }
@@ -100,7 +103,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
           <Typography variant="h5" mb={2}>
             Create a Bot
           </Typography>
-          <TextField value={amountToSwap} onChange={(e) => setAmountToSwap(e.target.value ?? '0')} variant="outlined" label="Amount to Swap" InputProps={{
+          <TextField value={amountToSwap} onChange={(e) => setAmountToSwap(e.target.value ?? '0')} variant="outlined" label="Amount to Invest" InputProps={{
             endAdornment: (
               <Button color="inherit" startIcon={
                 <Box
@@ -128,7 +131,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
             <Stack spacing={1}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Typography variant="caption">
-                  Swapping Pair:
+                  Trading Pair:
                 </Typography>
                 <Button sx={{ justifyContent: 'flex-start' }} variant="outlined" color="primary" startIcon={
                   <Box
@@ -144,7 +147,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
                   endIcon={selectedTargetTokenPriceLoading && <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />}
                 >
                   {selectedTargetToken.symbol} 
-                  {!!selectedTargetTokenPrice && ` ~$${selectedTargetTokenPrice.toFixed(4)}`}
+                  {!!selectedTargetTokenPrice && ` ~$${selectedTargetTokenPrice.toFixed(0)}`}
                 </Button>
               </Stack>
               {/* {!!targetCoinsQty && selectedTargetTokenPrice && 
@@ -161,7 +164,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
           }
           {!selectedTargetToken && 
             <Button variant="outlined" color="primary" onClick={() => setSelectedTargetTokenModalOpen(true)}>
-              Select Target Token for Swap
+              Select Target Token for Trade
             </Button>
           }
           {selectedTargetToken && 
@@ -181,8 +184,8 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
               </Select>
             </Stack>
             <Stack direction="row" spacing={1}>
-              <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => setLowerRange(e.target.value)} />
-              <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => setUpperRange(e.target.value)} />
+              <TextField fullWidth variant="outlined" label="Lower Range" value={lowerRange} onChange={(e) => !e.target.value.includes('.') && setLowerRange(e.target.value)} />
+              <TextField fullWidth variant="outlined" label="Upper Range" value={upperRange} onChange={(e) => !e.target.value.includes('.') && setUpperRange(e.target.value)} />
             </Stack>
           </>}
           {selectedTargetToken && <Button size="large" variant={isSubmitEnabled ? "contained" : "outlined"} color="primary" disabled={!isSubmitEnabled} onClick={handleOnSubmit}>
@@ -190,6 +193,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
             {!isEmptyOrZero(amountToSwap) && !selectedTargetToken && 'Select Target Token'}
             {!isEmptyOrZero(amountToSwap) && selectedTargetToken && (!lowerRange || !upperRange) && 'Enter Range'}
             {insufficientBalance && 'Insufficient Balance'}
+            {isSameToken && 'Select Different Token'}
             {isSubmitEnabled && 'Create Bot Now'}
           </Button>}
         </Stack>

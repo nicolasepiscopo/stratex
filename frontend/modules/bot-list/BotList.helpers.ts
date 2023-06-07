@@ -5,7 +5,7 @@ import { Bot } from "./BotList";
 import { useTokenList } from "../token-selector-modal/TokenSelectorModal.helpers";
 import { formatEther, parseEther } from "@ethersproject/units";
 
-const abi = [
+const STRATEX_ABI = [
   {
     "inputs": [],
     "name": "getBotsDetails",
@@ -52,10 +52,11 @@ export function useBotList () {
   const { data = [], isLoading } = useQuery<Bot[]>({
     queryKey: ['botList'],
     enabled: !!tokens.length && !!library,
+    refetchOnMount: true,
     queryFn: async () => {
-      const address = '0xDa3f4f092219601488B58352ed13B3dcDf457bF5';
+      const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
       const signer = library.getSigner();
-      const contract = new Contract(address, abi, signer);
+      const contract = new Contract(address, STRATEX_ABI, signer);
       const data = await contract.connect(signer).getBotsDetails();
 
       if (!data) {

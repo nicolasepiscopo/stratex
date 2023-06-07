@@ -7,6 +7,7 @@ import { formatEther, parseUnits } from "@ethersproject/units";
 import { BigNumber } from "@ethersproject/bignumber";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+import { orderBy } from "lodash";
 
 const ERC20_ABI = [
   {
@@ -287,7 +288,7 @@ export function useBotList () {
         }
       }
 
-      return bots;
+      return orderBy(bots, 'lastExecution', 'desc');
     }
   });
 

@@ -1,57 +1,60 @@
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmirshko%2Fnext-web3-boilerplate)
 
-This is a default [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app), customized as the default boilerplate for new Web3 projects.
 
-## Features
+<p align="center">
+  <img src="../docs/logo_transp_bg.png" alt="StratEx" style="width: 500px">
+</p>
 
-- Separate packages from [ethers.js](https://docs.ethers.io/v5/) for improved tree-shaking, often only ethers Contracts
-- [web3-react](https://github.com/NoahZinsmeister/web3-react) for ease of connecting to Web3 providers with a solid API
+# StratEx Frontend
 
-### Auto Contract Type Generation
+Repository for StratEx frontend application.
 
-**Note**: After adding in your new contract ABIs (in JSON format) to the `/contracts` folder, run `yarn compile-contract-types` to generate the types.
+## Tech Stack and libraries
 
-You can import these types when declaring a new Contract hook. The types generated show the function params and return types of your functions, among other helpful types. 
+- TypeScript
+- NextJS
+- React Query
+- Solidity
+- Ethersjs
 
-```ts
-import MY_CONTRACT_ABI from "../contracts/MY_CONTRACT.json";
-import type { MY_CONTRACT } from "../contracts/types";
-import useContract from "./useContract";
+## Local Setup
 
-export default function useMyContract() {
-  return useContract<MY_CONTRACT>(CONTRACT_ADDRESS, MY_CONTRACT_ABI);
-}
-```
+Clone the repository in your machine.
 
-## Previous Art
+Copy `.env.example` into `.env` and fill it out with your configuration.
 
-- [NoahZinsmeister/hypertext](https://github.com/NoahZinsmeister/hypertext)
-
-## Getting Started
-
-First, run the development server:
+Then to run the project:
 
 ```bash
-npm run dev
-# or
+# with yarn
+cd /{REPO_PATH}/frontend
+yarn
 yarn dev
+
+# with npm
+cd /{REPO_PATH}/frontend
+npm install
+npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Production environment
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+As of now production environment is a deployment of latest `main` branch. 
 
-## Learn More
+⚠️ ***It is limited to the usage of a single Bot.***
 
-To learn more about Next.js, take a look at the following resources:
+https://main--wonderful-stroopwafel-b179a1.netlify.app/
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Development environment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+As of now development environment is a deployment of `multipleBots1User` branch.
 
-## Deploy on Vercel
+https://deploy-preview-5--wonderful-stroopwafel-b179a1.netlify.app/
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This version comes with the support of some new beta features like:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Multiple users.
+- Multiple bots per user.
+- Pause / Resume Bots.
+- Watch tx event log for single Bot.
+- Withdraw balances from Bots.
+- Delete a Bot.

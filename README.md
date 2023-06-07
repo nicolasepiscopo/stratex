@@ -19,7 +19,9 @@ Our bot takes user input for the amount to spend, the upper and lower ranges to 
 
 ## Demo
 
-https://main--wonderful-stroopwafel-b179a1.netlify.app/
+Single Bot: https://main--wonderful-stroopwafel-b179a1.netlify.app/
+
+Multi Bot (beta): https://deploy-preview-5--wonderful-stroopwafel-b179a1.netlify.app/
 
 ## How we built it
 - Chainlink services and Uniswap are the primary implementations of this hackathon. Chainlink Automation is used to determine when a buy or sell (swap) operation should be triggered based on a calculation using the price of the base token pair against the dollar, provided by Chainlink Price Feed.
@@ -46,4 +48,8 @@ This is the first hackathon for many of us, and we managed the teamwork very wel
 ## What's next for StratEx
 - Optimizing the process in terms of gas consumption.
 - Providing a highly scalable solution. To achieve this, we are working on enhancements to support multiple bots for multiple users and extend the service with more supported token pairs.
+
+## Resources
+
+- [Front-end App README](./frontend/README.md)
 

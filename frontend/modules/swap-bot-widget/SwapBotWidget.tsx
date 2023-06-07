@@ -46,7 +46,7 @@ export function SwapBotWidget ({ onCancel, onSuccess }: SwapBotWidgetProps) {
     price: selectedTargetTokenPrice,
     isLoading: selectedTargetTokenPriceLoading,
   } = useTokenPrice(selectedTargetToken);
-  const createBot = useCreateBot({
+  const { createBot, isLoading: isCreatingBot } = useCreateBot({
     onSuccess,
   });
 
@@ -57,7 +57,7 @@ export function SwapBotWidget ({ onCancel, onSuccess }: SwapBotWidgetProps) {
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
   const insufficientBalance = balanceData && parseEther(`0${amountToSwap}`).gt(balanceData);
   const isSameToken = selectedToken?.address === selectedTargetToken?.address;
-  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance && !isSameToken;
+  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance && !isSameToken && !isCreatingBot;
 
   const isLoading = !selectedToken;
 
@@ -197,6 +197,7 @@ export function SwapBotWidget ({ onCancel, onSuccess }: SwapBotWidgetProps) {
             {insufficientBalance && 'Insufficient Balance'}
             {isSameToken && 'Select Different Token'}
             {isSubmitEnabled && 'Create Bot Now'}
+            {isCreatingBot && 'Creating Bot'}
           </Button>}
         </Stack>
         <TokenSelectorModal 

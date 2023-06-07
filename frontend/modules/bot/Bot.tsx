@@ -5,17 +5,25 @@ import Stack from "@mui/material/Stack";
 import Card from '@mui/material/Card';
 import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
+import Chip from "@mui/material/Chip";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
 import Head from "next/head";
 import { useBot, useDeleteBot, useDeposit, usePauseBot, useResumeBot, useWithdraw } from "../bot-list/BotList.helpers";
 import { useEvents } from "../event-list/EventList.helpers";
 import CircularProgress from "@mui/material/CircularProgress";
-import { ButtonGroup, Chip, List, ListItem, ListItemText, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import { theme } from "../../styles/theme";
 import { useRouter } from "next/router";
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { ArrowForward, Delete, MonetizationOn, Pause, PlayArrow, Wallet } from "@mui/icons-material";
-import { formatEther, parseEther } from "@ethersproject/units";
-import { BigNumber } from "@ethersproject/bignumber";
+import ArrowForward from "@mui/icons-material/ArrowForward";
+import Delete from "@mui/icons-material/Delete";
+import MonetizationOn from "@mui/icons-material/MonetizationOn";
+import Pause from "@mui/icons-material/Pause";
+import PlayArrow from "@mui/icons-material/PlayArrow";
+import Wallet from "@mui/icons-material/Wallet";
 
 export default function Bot () {
   const router = useRouter();
@@ -76,7 +84,7 @@ export default function Bot () {
                       {bot.amount > 0 && (
                         <Button color="success" startIcon={<Wallet />} onClick={() => {
                           withdraw({ amount: bot.amount, token: bot.token });
-                        }}>
+                        }} disabled={isDisabled}>
                           Withdraw
                         </Button>
                       )}
@@ -86,7 +94,7 @@ export default function Bot () {
                       {bot.amountPair > 0 && (
                         <Button color="success" startIcon={<Wallet />} onClick={() => {
                           withdraw({ amount: bot.amountPair, token: bot.tokenPair });
-                        }}>
+                        }} disabled={isDisabled}>
                           Withdraw
                         </Button>
                       )}

@@ -301,7 +301,7 @@ export function useBot (id: string) {
   const { library, chainId, account } = useWeb3React();
   const tokens = useTokenList(chainId);
   const { data, isLoading } = useQuery<Bot>({
-    queryKey: ['bot'],
+    queryKey: ['bot', id],
     enabled: !!tokens.length && !!library,
     refetchOnMount: true,
     queryFn: async () => {
@@ -362,6 +362,7 @@ export function usePauseBot () {
           isLoading: false,
           autoClose: 3000
         });
+        await queryClient.invalidateQueries(['bot', id]);
       } catch (e) {
         toast.update(toastId, { 
           render: "Failed to pause bot. Please try again.", 
@@ -374,7 +375,6 @@ export function usePauseBot () {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries(['botList']);
-      await queryClient.invalidateQueries(['bot']);
     },
   });
 
@@ -404,6 +404,7 @@ export function useResumeBot () {
           isLoading: false,
           autoClose: 3000
         });
+        await queryClient.invalidateQueries(['bot', id]);
       } catch (e) {
         toast.update(toastId, { 
           render: "Failed to resume bot. Please try again.", 
@@ -416,7 +417,6 @@ export function useResumeBot () {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries(['botList']);
-      await queryClient.invalidateQueries(['bot']);
     },
   });
 
@@ -505,7 +505,7 @@ export function useDeposit (id: string) {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries(['botList']);
-      await queryClient.invalidateQueries(['bot']);
+      await queryClient.invalidateQueries(['bot', id]);
     },
   });
 
@@ -547,7 +547,7 @@ export function useWithdraw (id: string) {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries(['botList']);
-      await queryClient.invalidateQueries(['bot']);
+      await queryClient.invalidateQueries(['bot', id]);
     },
   });
 

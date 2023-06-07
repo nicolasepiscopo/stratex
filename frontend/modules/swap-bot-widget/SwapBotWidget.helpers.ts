@@ -111,7 +111,7 @@ export function useCreateBot({ onSuccess }: UseCreateBotParams) {
   const { library, account } = useWeb3React();
   const queryClient = useQueryClient();
 
-  const { mutate } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationKey: ['createBot'],
     onSuccess: () => {
       onSuccess();
@@ -165,5 +165,8 @@ export function useCreateBot({ onSuccess }: UseCreateBotParams) {
     }
   });
 
-  return mutate;
+  return {
+    createBot: mutate,
+    isLoading,
+  } as const;
 }

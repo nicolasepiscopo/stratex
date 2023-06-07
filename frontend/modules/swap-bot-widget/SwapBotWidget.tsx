@@ -21,9 +21,10 @@ import { formatEther, parseEther } from "@ethersproject/units";
 
 interface SwapBotWidgetProps {
   onCancel?: () => void;
+  onSuccess?: () => void;
 }
 
-export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
+export function SwapBotWidget ({ onCancel, onSuccess }: SwapBotWidgetProps) {
   const { account, chainId } = useWeb3React<Web3Provider>();
   const tokens = useTokenList(chainId);
   const defaultToken = tokens.find(token => token.symbol === 'WMATIC'); 
@@ -46,7 +47,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
     isLoading: selectedTargetTokenPriceLoading,
   } = useTokenPrice(selectedTargetToken);
   const createBot = useCreateBot({
-    onSuccess: onCancel,
+    onSuccess,
   });
 
   const selectedTokenImg = selectedToken?.logoURI;
@@ -85,6 +86,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
         lowerRange: lowerRange ? Number(lowerRange) : 0,
         upperRange: upperRange ? Number(upperRange) : 0,
         tokenIn: selectedToken.address,
+        tokenOut: selectedTargetToken?.address,
       });
     } catch (error) {
       console.error(error);

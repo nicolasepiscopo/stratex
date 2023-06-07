@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWeb3React } from "@web3-react/core";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contract } from "@ethersproject/contracts";
@@ -10,6 +10,7 @@ interface UseCreateBotMutateParams {
   grids: number;
   amount: BigNumber;
   tokenIn: string;
+  tokenOut: string;
 }
 
 const ERC20_ABI = [
@@ -83,6 +84,16 @@ const STRATEX_ABI = [
         "internalType": "uint256",
         "name": "_amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenIn",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenOut",
+        "type": "address"
       }
     ],
     "name": "CreateBot",
@@ -98,12 +109,17 @@ interface UseCreateBotParams {
 
 export function useCreateBot({ onSuccess }: UseCreateBotParams) {
   const { library, account } = useWeb3React();
+  const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
     mutationKey: ['createBot'],
-    onSuccess,
+    onSuccess: () => {
+      onSuccess();
+
+      queryClient.invalidateQueries(['botList']);
+    },
     mutationFn: async ({
-      upperRange, lowerRange, grids, amount, tokenIn
+      upperRange, lowerRange, grids, amount, tokenIn, tokenOut
     }: UseCreateBotMutateParams) => {
       const toastId = toast.loading('Creating bot...');
       const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
@@ -122,7 +138,9 @@ export function useCreateBot({ onSuccess }: UseCreateBotParams) {
           BigNumber.from(upperRange.toString()),
           BigNumber.from(lowerRange.toString()),
           BigNumber.from(grids.toString()),
-          allowedAmount
+          allowedAmount,
+          tokenIn,
+          tokenOut
         );
 
         await signer.provider?.waitForTransaction(createBotTx.hash, 1, 100000);

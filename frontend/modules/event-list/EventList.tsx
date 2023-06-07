@@ -15,6 +15,7 @@ import orderBy from "lodash/orderBy";
 import Refresh from "@mui/icons-material/Refresh";
 import { Event } from "./EventList.helpers";
 import { toast } from "react-toastify";
+import { SymbolCell } from "./symbol-cell";
 
 interface BotListProps {
   events: Event[];
@@ -72,15 +73,8 @@ export function EventList ({ events, refetch }: BotListProps) {
             return (
               <TableRow key={event.id}>
                 <TableCell>
-                  <Box
-                    aria-label={event.symbol}
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      backgroundImage: `url(${event.symbolImage})`,
-                      backgroundSize: 'cover',
-                    }}
+                  <SymbolCell 
+                    botId={event.botId}
                   />
                 </TableCell>
                 <TableCell>

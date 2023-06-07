@@ -10,15 +10,27 @@ const abi = [
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
-        "name": "gridIndex",
+        "name": "botId",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "bool",
-        "name": "isFirstBreach",
-        "type": "bool"
+        "internalType": "enum StratEx.OrderType",
+        "name": "ordertype",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "gridIndex",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -31,14 +43,21 @@ const abi = [
         "internalType": "uint256",
         "name": "price",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
       }
     ],
-    "name": "GridBreached",
+    "name": "OrderExecuted",
     "type": "event"
   },
 ]
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { userAddress } = req.query;
   const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
   const provider = new JsonRpcProvider(
     process.env.ALCHEMY_RPC
@@ -49,20 +68,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     address,
     fromBlock: 0,
     toBlock: 'latest',
-    topics: [id('GridBreached(uint256,bool,uint256,uint256)')]
+    topics: [id('OrderExecuted(address,uint256,uint8,uint256,uint256,uint256,uint256)')]
   });
   const i = new Interface(abi);
 
-  res.status(200).json(logs.map(log => {
+  res.status(200).json(logs.filter(log => {
+    try {
+      const logData = i.parseLog(log);
+
+      return logData.args[0] === userAddress;
+    } catch (e) {
+      return false;
+    }
+  }).map(log => {
     try {
       const logData = i.parseLog(log);
 
       return {
-        name: logData.name,
-        gridIndex: logData.args[0].toString(),
-        isFirstBreach: logData.args[1],
-        quantity: logData.args[2].toString(),
-        price: logData.args[3].toString()
+        botId: logData.args[1].toString(),
+        orderType: logData.args[2] === 0 ? 'buy' : 'sell',
+        gridIndex: logData.args[3].toString(),
+        qty: logData.args[4].toString(),
+        price: logData.args[5].toString(),
+        timestamp: logData.args[6].toString(),
       }
     } catch (e) {
       return null;

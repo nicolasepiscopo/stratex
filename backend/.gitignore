@@ -4,3 +4,5 @@ cache
 node_modules
 .env
 package-lock.json
+typechain
+typechain-types

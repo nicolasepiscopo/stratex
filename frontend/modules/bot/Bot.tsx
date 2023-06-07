@@ -24,6 +24,8 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Pause from "@mui/icons-material/Pause";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import Wallet from "@mui/icons-material/Wallet";
+import { useTokenPrice } from "../../hooks/useTokenPrice";
+import { useDepositsAmount, useInitialAmount } from "./Bot.helpers";
 
 export default function Bot () {
   const router = useRouter();
@@ -39,6 +41,16 @@ export default function Bot () {
   const botEvents = events?.filter((event) => event.botId === botId) ?? [];
   const isRunning = bot?.status === 'running';
   const isDisabled = isResuming || isPausing || isDeleting || isDepositing || isWithdrawing;
+  const { price: tokenPrice } = useTokenPrice(bot?.token);
+  const { price: tokenPairPrice } = useTokenPrice(bot?.tokenPair);
+  const { price: tokenPairPriceToTokenIn } = useTokenPrice(bot?.tokenPair, bot?.token);
+  const initialAmount = useInitialAmount(bot?.id);
+  const depositsAmount = useDepositsAmount(bot?.id);
+  const totalInvested = initialAmount + depositsAmount;
+  const totalAmount = bot ? bot.amount + (tokenPairPriceToTokenIn * bot.amountPair) : 0;
+  const totalAmountUSD = bot ? tokenPrice * bot.amount + tokenPairPrice * bot.amountPair : 0;
+  const profitToken = totalAmount - totalInvested;
+  const percentage = ((profitToken*100)/totalInvested).toFixed(2);
   
   return (
     <Box>
@@ -52,7 +64,7 @@ export default function Bot () {
             <CircularProgress color="secondary" />
           </Stack>
         )}
-        {!isLoading && (
+        {!isLoading && bot && (
           <Box pt={4}>
             <Button onClick={() => router.back()} startIcon={<ArrowBack />} color="inherit">
               My Bots
@@ -98,6 +110,19 @@ export default function Bot () {
                           Withdraw
                         </Button>
                       )}
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary={`Total Amount Invested (${bot.token.symbol})`} secondary={(totalInvested).toFixed(3)} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary={`Total Balance (${bot.token.symbol})`} secondary={(totalAmount).toFixed(3)} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary={`Profit So Far (${bot.token.symbol})`} secondary={(profitToken).toFixed(3)} />
+                      {profitToken !== 0 && <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />}
                     </ListItem>
                     <ListItem>
                       <ListItemText primary="# Grids" secondary={bot.grids.toString()} />

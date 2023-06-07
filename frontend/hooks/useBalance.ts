@@ -15,24 +15,18 @@ const ERC20Abi = [
   },
 ]
 
-export default function useBalance(address: string, contractAddress?: string, suspense = false) {
-  const { library, chainId } = useWeb3React<Web3Provider>();
-  const shouldFetch = typeof address === "string" && !!library;
+export default function useBalance(address: string, contractAddress?: string) {
+  const { library } = useWeb3React<Web3Provider>();
+  const shouldFetch = typeof address === "string" && !!library && !!contractAddress;
   const { data } = useQuery({
     enabled: shouldFetch,
     queryKey: ["Balance"],
     refetchInterval: 1000,
     queryFn: async () => {
-      if (!contractAddress) {
-        const amount = await library.getBalance(address)
-        return amount;
-      } else {
-        const contract = new Contract(contractAddress, ERC20Abi, library);
-        const signer = library.getSigner();
-        const amount = await contract.connect(signer).balanceOf(address);
-        
-        return amount;
-      }
+      const contract = new Contract(contractAddress, ERC20Abi, library);
+      const amount = await contract.balanceOf(address);
+      
+      return amount;
     }
   });
 

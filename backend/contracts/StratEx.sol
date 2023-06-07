@@ -65,6 +65,7 @@ contract StratEx is AutomationCompatibleInterface {
     // Bot ID => token address => amount
     mapping(uint256 => mapping (address => uint256)) public balances;
 
+    event NewBot(uint256 botId, address user, uint256 upper_range, uint256 lower_range, uint256 no_of_grids, uint256 amount, address tokenIn, address tokenOut);
     event OrderExecuted(address user, uint256 botId, OrderType ordertype, uint256 gridIndex, uint256 qty , uint256 price, uint256 timestamp);
 
     // For this example, we will set the pool fee to 0.3%.
@@ -98,7 +99,7 @@ contract StratEx is AutomationCompatibleInterface {
         }
 
         bots[botCounter].currentGrid = calculateGrid(bots[botCounter].grids, currentPrice);
-
+        emit NewBot(botCounter, msg.sender, _upper_range, _lower_range, _no_of_grids, _amount, tokenIn, tokenOut);
         botCounter++;
     }
 
@@ -226,6 +227,9 @@ contract StratEx is AutomationCompatibleInterface {
         require(IERC20(token).balanceOf(address(this)) >= _amount, "Insufficient balance");        
         IERC20(token).transfer(msg.sender, _amount);
         balances[botId][token] -= _amount;
+        if (balances[botId][token] < minToDelete) {
+            bots[botId].isCancelled = true;
+        }
     }
 
     function getDecimals() public view returns (uint8) {
@@ -253,14 +257,13 @@ contract StratEx is AutomationCompatibleInterface {
      // function to cancel/resume bot execution
     function toggleBot(uint256 botIndex) external {
         require(bots[botIndex].user == msg.sender, "Only user can toogle");
-        Bot storage bot = bots[botIndex];
-        bot.isCancelled = !bot.isCancelled;
+        bots[botIndex].isCancelled = !bots[botIndex].isCancelled;
     }
 
     function deleteBot(uint256 botIndex) external {
         require(bots[botIndex].user == msg.sender, "Only user can toogle");
-        require(balances[botIndex][bots[botIndex].tokenIn] > minToDelete, "Balance should be 0");
-        require(balances[botIndex][bots[botIndex].tokenOut] > minToDelete, "Balance should be 0");
+        require(balances[botIndex][bots[botIndex].tokenIn] < minToDelete, "Balance should be 0");
+        require(balances[botIndex][bots[botIndex].tokenOut] < minToDelete, "Balance should be 0");
         delete bots[botIndex];
     }
 

@@ -20,6 +20,7 @@ Our bot takes user input for the amount to spend, the upper and lower ranges to 
 ## Demo
 
 Single Bot: https://main--wonderful-stroopwafel-b179a1.netlify.app/
+
 Multi Bot (beta): https://deploy-preview-5--wonderful-stroopwafel-b179a1.netlify.app/
 
 ## How we built it

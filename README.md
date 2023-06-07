@@ -21,7 +21,7 @@ Our bot takes user input for the amount to spend, the upper and lower ranges to 
 
 Single Bot: https://main--wonderful-stroopwafel-b179a1.netlify.app/
 
-Multi Bot (beta): https://deploy-preview-5--wonderful-stroopwafel-b179a1.netlify.app/
+Multi Bot (beta): https://deploy-preview-7--wonderful-stroopwafel-b179a1.netlify.app/
 
 ## How we built it
 - Chainlink services and Uniswap are the primary implementations of this hackathon. Chainlink Automation is used to determine when a buy or sell (swap) operation should be triggered based on a calculation using the price of the base token pair against the dollar, provided by Chainlink Price Feed.

@@ -48,7 +48,7 @@ https://main--wonderful-stroopwafel-b179a1.netlify.app/
 
 As of now development environment is a deployment of `multipleBots1User` branch.
 
-https://deploy-preview-5--wonderful-stroopwafel-b179a1.netlify.app/
+https://deploy-preview-7--wonderful-stroopwafel-b179a1.netlify.app/
 
 This version comes with the support of some new beta features like:
 

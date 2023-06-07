@@ -178,34 +178,33 @@ contract StratEx is AutomationCompatibleInterface {
         // end testing
         for (uint256 i = 0; i < performDataDecoded.length; i++) {
             PerformData memory performDataIndividual = performDataDecoded[i];
-            uint256 botId = performDataIndividual.botId;
             // if number of grid are 5, it means that we could have grids from 0 to 6
             uint256 breachIndex = performDataIndividual.breachIndex; 
-            Bot storage bot = bots[botId];
+            Bot storage bot = bots[performDataIndividual.botId];
             
             // check again if the order should be executed. To avoid malicious external requests
             OrderType checkedOrdertype;
             uint256 checkedNewGrid = calculateGrid(bot.grids, price);
             bool botNeedExecution;
-            (botNeedExecution, checkedOrdertype) = checkOrderExecution(botId, checkedNewGrid, bot.currentGrid);
+            (botNeedExecution, checkedOrdertype) = checkOrderExecution(performDataIndividual.botId, checkedNewGrid, bot.currentGrid);
             require(botNeedExecution, "Order should not be executed");
 
             uint256 amountToSwap;
             if(checkedOrdertype == OrderType.BuyOrder) {
                 // BUY
-                amountToSwap = (balances[botId][bot.tokenIn] * balanceToSpentBPS) / 10000;
+                amountToSwap = (balances[performDataIndividual.botId][bot.tokenIn] * balanceToSpentBPS) / 10000;
                 // autocancel bot
                 if (amountToSwap < minimunAmountAllowed) {
                     bot.isCancelled = true;
                     continue;
                 }
-                executeOrder(checkedOrdertype, botId, amountToSwap, bot, breachIndex, price);
+                executeOrder(checkedOrdertype, performDataIndividual.botId, amountToSwap, bot, breachIndex, price);
             }
             if(checkedOrdertype == OrderType.SellOrder) {
                 // ToDo => if price goes down multiple grids, multiple sells need to be placed
                 // SELL
-                amountToSwap = boughtBotAmounts[botId][breachIndex - 2];
-                executeOrder(checkedOrdertype, botId, amountToSwap, bot, breachIndex, price);   
+                amountToSwap = boughtBotAmounts[performDataIndividual.botId][breachIndex - 2];
+                executeOrder(checkedOrdertype, performDataIndividual.botId, amountToSwap, bot, breachIndex, price);   
             }
             if (checkedOrdertype == OrderType.UpdateCurrentGrid) {
                 bot.currentGrid = breachIndex;

@@ -486,7 +486,7 @@ export function useDeposit (id: string) {
         await signer.provider?.waitForTransaction(approveTx.hash, 1, 100000);
         const allowedAmount = await tokenContract.connect(signer).allowance(account, address);
         const tx = await contract.connect(signer).deposit(allowedAmount, BigNumber.from(id));
-        await signer.provider?.waitForTransaction(tx.hash, 1, 100000);
+        await signer.provider?.waitForTransaction(tx.hash, 5, 100000);
         toast.update(toastId, { 
           render: "Deposit done successfully!", 
           type: "success", 

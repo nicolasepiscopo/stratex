@@ -355,7 +355,7 @@ export function usePauseBot () {
         const signer = library.getSigner();
         const contract = new Contract(address, STRATEX_ABI, signer);
         const tx = await contract.connect(signer).toggleBot(BigNumber.from(id));
-        await signer.provider?.waitForTransaction(tx.hash, 1, 100000);
+        await signer.provider?.waitForTransaction(tx.hash, 5, 100000);
         toast.update(toastId, { 
           render: "Bot paused successfully!", 
           type: "success", 
@@ -397,7 +397,7 @@ export function useResumeBot () {
         const signer = library.getSigner();
         const contract = new Contract(address, STRATEX_ABI, signer);
         const tx = await contract.connect(signer).toggleBot(BigNumber.from(id));
-        await signer.provider?.waitForTransaction(tx.hash, 1, 100000);
+        await signer.provider?.waitForTransaction(tx.hash, 5, 100000);
         toast.update(toastId, { 
           render: "Bot resumed successfully!", 
           type: "success", 
@@ -440,7 +440,7 @@ export function useDeleteBot () {
         const signer = library.getSigner();
         const contract = new Contract(address, STRATEX_ABI, signer);
         const tx = await contract.connect(signer).deleteBot(BigNumber.from(id));
-        await signer.provider?.waitForTransaction(tx.hash, 1, 100000);
+        await signer.provider?.waitForTransaction(tx.hash, 5, 100000);
         toast.update(toastId, { 
           render: "Bot deleted successfully!", 
           type: "success", 
@@ -483,7 +483,7 @@ export function useDeposit (id: string) {
         const contract = new Contract(address, STRATEX_ABI, signer);
         const tokenContract = new Contract(token.address, ERC20_ABI, signer);
         const approveTx = await tokenContract.connect(signer).approve(address, 0);
-        await signer.provider?.waitForTransaction(approveTx.hash, 1, 100000);
+        await signer.provider?.waitForTransaction(approveTx.hash, 5, 100000);
         const allowedAmount = await tokenContract.connect(signer).allowance(account, address);
         const tx = await contract.connect(signer).deposit(allowedAmount, BigNumber.from(id));
         await signer.provider?.waitForTransaction(tx.hash, 5, 100000);
@@ -528,7 +528,7 @@ export function useWithdraw (id: string) {
         const signer = library.getSigner();
         const contract = new Contract(address, STRATEX_ABI, signer);
         const tx = await contract.connect(signer).withdraw(BigNumber.from(parseUnits(amount.toString())).toString(), BigNumber.from(id), token.address);
-        await signer.provider?.waitForTransaction(tx.hash, 1, 100000);
+        await signer.provider?.waitForTransaction(tx.hash, 5, 100000);
         toast.update(toastId, { 
           render: "Withdrawal done successfully!", 
           type: "success", 

@@ -15,7 +15,7 @@ We found that this kind of bot is only available on centralized exchanges like B
 ## What it does
 Our bot takes user input for the amount to spend, the upper and lower ranges to operate within, and the specific points between those limits to either purchase or sell the base token against a stablecoin.
 
-![Architecture](./docs/architecture.png)
+![Architecture](./docs/architecture.svg)
 
 ## Demo
 

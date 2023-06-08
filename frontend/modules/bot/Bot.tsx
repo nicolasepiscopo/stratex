@@ -156,18 +156,18 @@ export default function Bot () {
               </Card>
               <Stack sx={{width: '100%'}} spacing={2}>
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  <Chip 
-                    label={`$${tokenPrice?.toFixed(4)}`}
+                  {tokenPrice && <Chip 
+                    label={`$${tokenPrice.toFixed(4)}`}
                     avatar={<Avatar alt={bot.token.symbol} src={bot.token.logoURI} />}
                     color="primary"
                     variant="outlined"
-                  />
-                  <Chip 
-                    label={`$${tokenPairPrice?.toFixed(4)}`}
+                  />}
+                  {tokenPairPrice && <Chip 
+                    label={`$${tokenPairPrice.toFixed(4)}`}
                     avatar={<Avatar alt={bot.tokenPair.symbol} src={bot.tokenPair.logoURI} />}
                     color="primary"
                     variant="outlined"
-                  />
+                  />}
                 </Stack>
                 <EventList events={botEvents} refetch={refetch} />
               </Stack>

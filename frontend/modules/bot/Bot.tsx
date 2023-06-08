@@ -26,9 +26,9 @@ import PlayArrow from "@mui/icons-material/PlayArrow";
 import Wallet from "@mui/icons-material/Wallet";
 import { useTokenPrice } from "../../hooks/useTokenPrice";
 import { useDepositsAmount, useInitialAmount } from "./Bot.helpers";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
-import { GraphicEq, WaterfallChart } from "@mui/icons-material";
+import ShowChart from "@mui/icons-material/ShowChart";
 
 export default function Bot () {
   const router = useRouter();
@@ -57,6 +57,19 @@ export default function Bot () {
   const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair > 0;
   const percentage = ((profitToken*100)/totalInvested).toFixed(2);
   const graphicSymbol = bot?.tokenPair.symbol.at(0) === 'W' ? bot?.tokenPair.symbol.slice(1) : bot?.tokenPair.symbol;
+  const MemoizedChart = useMemo(() => (
+    <AdvancedRealTimeChart 
+      theme="dark" 
+      autosize 
+      symbol={`BITSTAMP:${graphicSymbol}USD`} 
+      hide_top_toolbar
+      hide_legend
+      hide_side_toolbar
+      allow_symbol_change={false}
+      show_popup_button={false}
+      range="1D"
+    />
+  ), [graphicSymbol]);
   
   return (
     <Box>
@@ -161,23 +174,11 @@ export default function Bot () {
               </Card>
               <Stack sx={{width: '100%'}} spacing={2}>
                 <Stack direction="row" justifyContent="flex-end">
-                  <Button onClick={() => setIsGraphicOpen((current) => !current)} variant="outlined" color="primary" startIcon={<WaterfallChart />}>
-                    {isGraphicOpen ? 'Hide' : 'Show'} Price Graphic
+                  <Button onClick={() => setIsGraphicOpen((current) => !current)} variant="outlined" color="primary" startIcon={<ShowChart />}>
+                    {isGraphicOpen ? 'Hide' : 'Show'} Real-Time Price Chart
                   </Button>
                 </Stack>
-                {isGraphicOpen && graphicSymbol && (
-                  <AdvancedRealTimeChart 
-                    theme="dark" 
-                    autosize 
-                    symbol={`BITSTAMP:${graphicSymbol}USD`} 
-                    hide_top_toolbar
-                    hide_legend
-                    hide_side_toolbar
-                    allow_symbol_change={false}
-                    show_popup_button={false}
-                    range="1D"
-                  />
-                )}
+                {isGraphicOpen && graphicSymbol && MemoizedChart}
                 <EventList events={botEvents} refetch={refetch} />
               </Stack>
             </Stack>

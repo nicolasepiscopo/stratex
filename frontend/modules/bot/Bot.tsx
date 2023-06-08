@@ -119,10 +119,10 @@ export default function Bot () {
                       <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested} ${bot.token.symbol}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Total Balance (${bot.token.symbol})`} secondary={`${totalAmount} ${bot.token.symbol}`} />
+                      <ListItemText primary={`Total Balance`} secondary={`${totalAmount} ${bot.token.symbol}`} />
                     </ListItem>
                     {shouldShowProfit && <ListItem>
-                      <ListItemText primary={`Profit So Far (${bot.token.symbol})`} secondary={`${profitToken} ${bot.token.symbol}`} />
+                      <ListItemText primary={`Profit So Far`} secondary={`${profitToken} ${bot.token.symbol}`} />
                       <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />
                     </ListItem>}
                     <ListItem>

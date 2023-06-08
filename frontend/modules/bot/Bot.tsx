@@ -26,6 +26,9 @@ import PlayArrow from "@mui/icons-material/PlayArrow";
 import Wallet from "@mui/icons-material/Wallet";
 import { useTokenPrice } from "../../hooks/useTokenPrice";
 import { useDepositsAmount, useInitialAmount } from "./Bot.helpers";
+import { useState } from "react";
+import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
+import { GraphicEq, WaterfallChart } from "@mui/icons-material";
 
 export default function Bot () {
   const router = useRouter();
@@ -34,6 +37,7 @@ export default function Bot () {
   const { deleteBot, isLoading: isDeleting } = useDeleteBot();
   const { pause, isLoading: isPausing } = usePauseBot();
   const { resume, isLoading: isResuming } = useResumeBot();
+  const [isGraphicOpen, setIsGraphicOpen] = useState(false);
   const { deposit, isLoading: isDepositing } = useDeposit(botId as string);
   const { withdraw, isLoading: isWithdrawing } = useWithdraw(botId as string);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'));
@@ -52,6 +56,7 @@ export default function Bot () {
   const profitToken = totalAmount - totalInvested;
   const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair > 0;
   const percentage = ((profitToken*100)/totalInvested).toFixed(2);
+  const graphicSymbol = bot?.tokenPair.symbol.at(0) === 'W' ? bot?.tokenPair.symbol.slice(1) : bot?.tokenPair.symbol;
   
   return (
     <Box>
@@ -155,20 +160,24 @@ export default function Bot () {
                 </Stack>
               </Card>
               <Stack sx={{width: '100%'}} spacing={2}>
-                <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  {tokenPrice && <Chip 
-                    label={`$${tokenPrice.toFixed(4)}`}
-                    avatar={<Avatar alt={bot.token.symbol} src={bot.token.logoURI} />}
-                    color="primary"
-                    variant="outlined"
-                  />}
-                  {tokenPairPrice && <Chip 
-                    label={`$${tokenPairPrice.toFixed(4)}`}
-                    avatar={<Avatar alt={bot.tokenPair.symbol} src={bot.tokenPair.logoURI} />}
-                    color="primary"
-                    variant="outlined"
-                  />}
+                <Stack direction="row" justifyContent="flex-end">
+                  <Button onClick={() => setIsGraphicOpen((current) => !current)} variant="outlined" color="primary" startIcon={<WaterfallChart />}>
+                    {isGraphicOpen ? 'Hide' : 'Show'} Price Graphic
+                  </Button>
                 </Stack>
+                {isGraphicOpen && graphicSymbol && (
+                  <AdvancedRealTimeChart 
+                    theme="dark" 
+                    autosize 
+                    symbol={`BITSTAMP:${graphicSymbol}USD`} 
+                    hide_top_toolbar
+                    hide_legend
+                    hide_side_toolbar
+                    allow_symbol_change={false}
+                    show_popup_button={false}
+                    range="1D"
+                  />
+                )}
                 <EventList events={botEvents} refetch={refetch} />
               </Stack>
             </Stack>

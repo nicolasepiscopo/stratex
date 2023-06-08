@@ -50,6 +50,7 @@ export default function Bot () {
   const totalAmount = bot ? bot.amount + (tokenPairPriceToTokenIn * bot.amountPair) : 0;
   const totalAmountUSD = bot ? tokenPrice * bot.amount + tokenPairPrice * bot.amountPair : 0;
   const profitToken = totalAmount - totalInvested;
+  const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair > 0;
   const percentage = ((profitToken*100)/totalInvested).toFixed(2);
   
   return (
@@ -115,23 +116,23 @@ export default function Bot () {
                       <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Total Amount Invested (${bot.token.symbol})`} secondary={(totalInvested).toFixed(3)} />
+                      <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested} ${bot.token.symbol}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Total Balance (${bot.token.symbol})`} secondary={(totalAmount).toFixed(3)} />
+                      <ListItemText primary={`Total Balance (${bot.token.symbol})`} secondary={`${totalAmount} ${bot.token.symbol}`} />
                     </ListItem>
-                    <ListItem>
-                      <ListItemText primary={`Profit So Far (${bot.token.symbol})`} secondary={(profitToken).toFixed(3)} />
-                      {profitToken !== 0 && <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />}
-                    </ListItem>
+                    {shouldShowProfit && <ListItem>
+                      <ListItemText primary={`Profit So Far (${bot.token.symbol})`} secondary={`${profitToken} ${bot.token.symbol}`} />
+                      <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />
+                    </ListItem>}
                     <ListItem>
                       <ListItemText primary="# Grids" secondary={bot.grids.toString()} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary="Lower Range" secondary={bot.lowerRange.toString()} />
+                      <ListItemText primary="Lower Range" secondary={`$${bot.lowerRange.toString()}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary="Upper Range" secondary={bot.upperRange.toString()} />
+                      <ListItemText primary="Upper Range" secondary={`$${bot.upperRange.toString()}`} />
                     </ListItem>
                     <ListItem>
                       <ListItemText primary="Last execution" secondary={bot.lastExecution} />

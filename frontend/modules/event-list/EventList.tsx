@@ -51,9 +51,7 @@ export function EventList ({ events, refetch }: BotListProps) {
       <Table aria-label="events-table">
         <TableHead>
           <TableRow>
-            <TableCell>
-              Symbol
-            </TableCell>
+            <TableCell width={100} />
             <TableCell>
               Order Type
             </TableCell>
@@ -72,7 +70,7 @@ export function EventList ({ events, refetch }: BotListProps) {
           {orderBy(events, ['date'], ['desc']).map((event) => {
             return (
               <TableRow key={event.id}>
-                <TableCell>
+                <TableCell align="center">
                   <SymbolCell 
                     botId={event.botId}
                   />

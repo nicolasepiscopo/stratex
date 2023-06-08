@@ -93,7 +93,7 @@ export default function Bot () {
                   </Stack>
                   <List aria-label="bot details">
                     <ListItem>
-                      <ListItemText primary={`${bot.token.symbol} Amount`} secondary={bot.amount.toString()} />
+                      <ListItemText primary={`${bot.token.symbol} Amount`} secondary={bot.amount.toFixed(4)} />
                       {bot.amount > 0 && (
                         <Button color="success" startIcon={<Wallet />} onClick={() => {
                           withdraw({ amount: bot.amount, token: bot.token });
@@ -103,7 +103,7 @@ export default function Bot () {
                       )}
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`${bot.tokenPair.symbol} Amount`} secondary={bot.amountPair.toString()} />
+                      <ListItemText primary={`${bot.tokenPair.symbol} Amount`} secondary={bot.amountPair.toFixed(4)} />
                       {bot.amountPair > 0 && (
                         <Button color="success" startIcon={<Wallet />} onClick={() => {
                           withdraw({ amount: bot.amountPair, token: bot.tokenPair });
@@ -116,13 +116,13 @@ export default function Bot () {
                       <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested} ${bot.token.symbol}`} />
+                      <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested.toFixed(4)} ${bot.token.symbol}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Total Balance`} secondary={`${totalAmount} ${bot.token.symbol}`} />
+                      <ListItemText primary={`Total Balance`} secondary={`${totalAmount.toFixed(4)} ${bot.token.symbol}`} />
                     </ListItem>
                     {shouldShowProfit && <ListItem>
-                      <ListItemText primary={`Profit So Far`} secondary={`${profitToken} ${bot.token.symbol}`} />
+                      <ListItemText primary={`Profit So Far`} secondary={`${profitToken.toFixed(4)} ${bot.token.symbol}`} />
                       <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />
                     </ListItem>}
                     <ListItem>

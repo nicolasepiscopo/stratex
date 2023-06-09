@@ -26,9 +26,8 @@ import PlayArrow from "@mui/icons-material/PlayArrow";
 import Wallet from "@mui/icons-material/Wallet";
 // import { useTokenPrice } from "../../hooks/useTokenPrice";
 import { useDepositsAmount, useInitialAmount } from "./Bot.helpers";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
-import ShowChart from "@mui/icons-material/ShowChart";
 import { BasicTabs } from "../../components/BasicTabs";
 
 export default function Bot () {

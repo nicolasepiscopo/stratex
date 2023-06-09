@@ -18,7 +18,7 @@ Our bot incorporates user input for various parameters, including the spending a
 ![Architecture](./docs/architecture.svg)
 
 ## Demo
-We dedicated significant effort to develop the initial prototype, which is the Single Bot that you can see in the video
+We dedicated significant effort to develop the initial prototype, which is the Single Bot that you can see in the video.
 
 ### New Features
 Once we successfully achieved the first version, we proceeded to the next step, which involved building a prototype capable of supporting multiple users and multiple bots. As a result, we were able to complete this alpha implementation, and you can find it here:

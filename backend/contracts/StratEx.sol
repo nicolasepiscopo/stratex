@@ -25,7 +25,7 @@ contract StratEx is AutomationCompatibleInterface {
 
     AggregatorV3Interface internal priceFeed;
     address public constant routerAddress = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
-    uint256 public constant minimunAmountAllowed = 1500000000000000;
+    uint256 public constant minimunAmountAllowed = 150000000000000000;
     // ToDo
     uint256 public constant minToDelete = 1500000000000000;
 

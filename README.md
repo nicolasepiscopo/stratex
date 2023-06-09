@@ -18,14 +18,14 @@ Our bot incorporates user input for various parameters, including the spending a
 ![Architecture](./docs/architecture.svg)
 
 ## Demo
-We dedicated significant effort to develop the initial prototype, which is the Single Bot you can see here: https://main--wonderful-stroopwafel-b179a1.netlify.app/
+We dedicated significant effort to develop the initial prototype, which is the Single Bot that you can see in the video
 
-### Beta Features
-Once we successfully achieved the first version, we proceeded to the next step, which involved building a prototype capable of supporting multiple users and multiple bots. As a result, we were able to complete this beta implementation, and you can find it here:
+### New Features
+Once we successfully achieved the first version, we proceeded to the next step, which involved building a prototype capable of supporting multiple users and multiple bots. As a result, we were able to complete this alpha implementation, and you can find it here:
 
-- Multi Bot Demo (beta): https://deploy-preview-7--wonderful-stroopwafel-b179a1.netlify.app/
-- Bot address: https://mumbai.polygonscan.com/address/0x82579fa73e1E309DC091e41DB394002012c3623D
-- branch github: https://github.com/nicolasepiscopo/stratex/tree/multipleBots1User
+- Try it out: https://main--wonderful-stroopwafel-b179a1.netlify.app/
+- Bot address: https://mumbai.polygonscan.com/address/0xc1068508bae3721016745db9000240f60bf59ab0
+- github: https://github.com/nicolasepiscopo/stratex
 - Chainlink UpKeep: https://automation.chain.link/mumbai/49731425686354808993613655674146670068471707538328680082346472121761589595239
 
 We are aware that there are numerous improvements planned for our project following this hackathon, and we have mentioned some of them in our future plans section [later](#what's-next-for-stratex).
@@ -34,7 +34,7 @@ Regarding the first screen that allows users to create a bot, it remains the sam
 #### Connect user wallet
 > ⚠️ We only support Metamask just now
 
-![connect user wallet](./docs/screenshots/01-StratEx.png)
+![connect user wallet](https://raw.githubusercontent.com/nicolasepiscopo/stratex/main/docs/screenshots/01-StratEx.png)
 
 #### Create Bot
 When you click on `Create your First Bot` button in the home screen the create bot form will appear if there is no previous bot instances created in the smart contract.
@@ -62,7 +62,7 @@ Additionally, there is a chart where the user can monitor the real-time ETH pric
 
 ## How we built it
 - Chainlink services and Uniswap are the primary implementations of this hackathon. Chainlink Automation is used to determine when a buy or sell (swap) operation should be triggered based on a calculation using the price of the base token pair against the dollar, provided by Chainlink Price Feed.
-- We built a "bot" smart contract to operate in a decentralized manner, connected to the checkUpkeep and performUpkeep Chainlink automation functions. [Contract Source Code](./backend/contracts/TradeBot.sol)
+- We built a "bot" smart contract to operate in a decentralized manner, connected to the checkUpkeep and performUpkeep Chainlink automation functions. [Contract Source Code](https://github.com/nicolasepiscopo/stratex/blob/main/backend/contracts/StratEx.sol)
 
 ## Challenges we ran into
 - Implementing the idea into a functional smart contract that operates autonomously.

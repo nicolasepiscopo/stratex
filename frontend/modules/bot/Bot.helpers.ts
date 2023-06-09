@@ -2,6 +2,7 @@ import { formatEther, parseEther, parseUnits } from "@ethersproject/units";
 import { useQuery } from "@tanstack/react-query";
 import { useWeb3React } from "@web3-react/core";
 import { Token } from "../token-selector-modal/TokenSelectorModal.helpers";
+import { Bot } from "../bot-list";
 
 interface ContractEvent {
   botId: string;
@@ -106,4 +107,22 @@ export function useQuote({ tokenIn, tokenOut, amount }: UseQuoteParams) {
   return {
     quote: data, isLoading
   } as const;
+}
+
+export function useBotStats (bot: Bot | undefined) {
+  const initialAmount = useInitialAmount(bot?.id);
+  const depositsAmount = useDepositsAmount(bot?.id);
+  const totalInvested = initialAmount + depositsAmount;
+  const totalAmount = bot ? bot.amount : 0;
+  const profit = totalAmount - totalInvested;
+  const shouldShowProfit = profit !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair === 0;
+  const profitPercentage = ((profit*100)/totalInvested).toFixed(2);
+
+  return {
+    totalInvested,
+    totalAmount,
+    profit,
+    profitPercentage,
+    shouldShowProfit,
+  }
 }

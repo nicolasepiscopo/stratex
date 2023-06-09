@@ -82,9 +82,9 @@ export function useBotTokenIn (id: string) {
       const signer = library.getSigner();
       const contract = new Contract(address, STRATEX_ABI, signer);
       const data = await contract.connect(signer).bots(BigNumber.from(id));
-      const isOwner = true; // data.user === account;
+      const isOwner = data.user === account;
 
-      if (!isOwner) return undefined;
+      if (!isOwner) return null;
       
       return tokens.find(token => token.address === data.tokenIn);
     }

@@ -67,9 +67,9 @@ export function EventList ({ events, refetch }: BotListProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {orderBy(events, ['date'], ['desc']).map((event) => {
+          {orderBy(events, ['date'], ['desc']).map((event, index) => {
             return (
-              <TableRow key={event.id}>
+              <TableRow key={index}>
                 <TableCell align="center">
                   <SymbolCell 
                     botId={event.botId}

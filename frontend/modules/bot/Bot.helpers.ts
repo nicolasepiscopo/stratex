@@ -84,16 +84,19 @@ interface UseQuoteParams {
 }
 
 export function useQuote({ tokenIn, tokenOut, amount }: UseQuoteParams) {
-  const { library } = useWeb3React();
   const { data, isLoading } = useQuery({
     enabled: !!tokenIn && !!tokenOut,
     queryKey: ['quote'],
     queryFn: async () => {
       const formattedAmount = parseEther(amount.toString());
-      const data = await fetch(`https://api.uniswap.org/v1/quote?protocols=v2%2Cv3%2Cmixed&tokenInAddress=${tokenIn.address}&tokenInChainId=${tokenIn.chainId}&tokenOutAddress=${tokenOut.address}&tokenOutChainId=${tokenOut.chainId}&amount=${formattedAmount}&type=exactIn`)
-      const { quoteDecimals } = await data.json();
+      const data = await fetch(`/api/quote?tokenInAddress=${tokenIn?.address}&tokenOutAddress=${tokenOut?.address}&amount=${formattedAmount}`)
+      const { quote } = await data.json();
 
-      return parseFloat(quoteDecimals);
+      console.log({
+        quote: formatEther(quote),
+      })
+
+      return parseFloat(formatEther(quote));
     },
     onError: (error) => {
       console.log(error);

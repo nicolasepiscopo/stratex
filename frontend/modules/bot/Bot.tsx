@@ -24,7 +24,7 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Pause from "@mui/icons-material/Pause";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import Wallet from "@mui/icons-material/Wallet";
-import { useTokenPrice } from "../../hooks/useTokenPrice";
+// import { useTokenPrice } from "../../hooks/useTokenPrice";
 import { useDepositsAmount, useInitialAmount, useQuote } from "./Bot.helpers";
 import { useMemo, useState } from "react";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
@@ -45,21 +45,17 @@ export default function Bot () {
   const botEvents = events?.filter((event) => event.botId === botId) ?? [];
   const isRunning = bot?.status === 'running';
   const isDisabled = isResuming || isPausing || isDeleting || isDepositing || isWithdrawing;
-  const { price: tokenPrice } = useTokenPrice(bot?.token);
-  const { price: tokenPairPrice } = useTokenPrice(bot?.tokenPair);
-  const { quote: tokenPairPriceToTokenIn } = useQuote({ tokenIn: bot?.tokenPair, tokenOut: bot?.token, amount: bot?.amountPair });
+  // const { price: tokenPrice } = useTokenPrice(bot?.token);
+  // const { price: tokenPairPrice } = useTokenPrice(bot?.tokenPair);
+  // const { quote: tokenPairPriceToTokenIn } = useQuote({ tokenIn: bot?.tokenPair, tokenOut: bot?.token, amount: bot?.amountPair });
   const initialAmount = useInitialAmount(bot?.id);
   const depositsAmount = useDepositsAmount(bot?.id);
   const totalInvested = initialAmount + depositsAmount;
-  const totalAmount = bot ? bot.amount + tokenPairPriceToTokenIn : 0;
-  console.log({
-    totalAmount,
-    tokenPairPriceToTokenIn
-  })
-  const totalAmountUSD = bot ? tokenPrice * bot.amount + tokenPairPrice * bot.amountPair : 0;
-  const profitToken = totalAmount - totalInvested;
-  const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair > 0;
-  const percentage = ((profitToken*100)/totalInvested).toFixed(2);
+  // const totalAmount = bot ? bot.amount + tokenPairPriceToTokenIn : 0;
+  // const totalAmountUSD = bot ? tokenPrice * bot.amount + tokenPairPrice * bot.amountPair : 0;
+  // const profitToken = totalAmount - totalInvested;
+  // const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair > 0;
+  // const percentage = ((profitToken*100)/totalInvested).toFixed(2);
   const graphicSymbol = bot?.tokenPair.symbol.at(0) === 'W' ? bot?.tokenPair.symbol.slice(1) : bot?.tokenPair.symbol;
   const MemoizedChart = useMemo(() => (
     <AdvancedRealTimeChart 
@@ -89,99 +85,101 @@ export default function Bot () {
         )}
         {!isLoading && bot && (
           <Box pt={4}>
-            <Button onClick={() => router.back()} startIcon={<ArrowBack />} color="inherit">
-              My Bots
-            </Button>
+            <Stack direction="row" justifyContent="space-between">
+              <Button onClick={() => router.back()} startIcon={<ArrowBack />} color="inherit">
+                My Bots
+              </Button>
+              <Button onClick={() => setIsGraphicOpen((current) => !current)} variant="outlined" color="primary" startIcon={<ShowChart />}>
+                {isGraphicOpen ? 'Hide' : 'Show'} Real-Time Price Chart
+              </Button>
+            </Stack>
             <Stack direction={!isSmallScreen ? "row" : "column"} spacing={2} mt={3}>
-              <Card sx={{ p: 2, minWidth: 400 }}>
-                <Stack spacing={1}>
-                  <Stack direction="row" spacing={2} pb={2} justifyContent="space-between" alignContent="center" alignItems="center"> 
-                    <Stack direction="row" spacing={1} justifyContent="space-between" alignContent="center" alignItems="center">
-                      <Avatar 
-                        src={bot.token.logoURI}
-                        alt={bot.token.symbol}
-                      />
-                      <ArrowForward />
-                      <Avatar 
-                        src={bot.tokenPair.logoURI}
-                        alt={bot.tokenPair.symbol}
+              <Box sx={{ minWidth: 400 }}>
+                <Card sx={{ p: 2 }}>
+                  <Stack spacing={1}>
+                    <Stack direction="row" spacing={2} pb={2} justifyContent="space-between" alignContent="center" alignItems="center"> 
+                      <Stack direction="row" spacing={1} justifyContent="space-between" alignContent="center" alignItems="center">
+                        <Avatar 
+                          src={bot.token.logoURI}
+                          alt={bot.token.symbol}
+                        />
+                        <ArrowForward />
+                        <Avatar 
+                          src={bot.tokenPair.logoURI}
+                          alt={bot.tokenPair.symbol}
+                        />
+                      </Stack>
+                      <Chip 
+                        color={isRunning ? 'success' : 'warning'}
+                        variant="filled"
+                        label={isRunning ? 'RUNNING' : 'PAUSED'}
                       />
                     </Stack>
-                    <Chip 
-                      color={isRunning ? 'success' : 'warning'}
-                      variant="filled"
-                      label={isRunning ? 'RUNNING' : 'PAUSED'}
-                    />
+                    <List aria-label="bot details">
+                      <ListItem>
+                        <ListItemText primary={`${bot.token.symbol} Amount`} secondary={bot.amount.toFixed(4)} />
+                        {bot.amount > 0 && (
+                          <Button color="success" startIcon={<Wallet />} onClick={() => {
+                            withdraw({ amount: bot.amount, token: bot.token });
+                          }} disabled={isDisabled}>
+                            Withdraw
+                          </Button>
+                        )}
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary={`${bot.tokenPair.symbol} Amount`} secondary={bot.amountPair.toFixed(4)} />
+                        {bot.amountPair > 0 && (
+                          <Button color="success" startIcon={<Wallet />} onClick={() => {
+                            withdraw({ amount: bot.amountPair, token: bot.tokenPair });
+                          }} disabled={isDisabled}>
+                            Withdraw
+                          </Button>
+                        )}
+                      </ListItem>
+                      {/* <ListItem>
+                        <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested.toFixed(4)} ${bot.token.symbol}`} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary={`Total Balance`} secondary={`${totalAmount.toFixed(4)} ${bot.token.symbol}`} />
+                      </ListItem>
+                      {shouldShowProfit && <ListItem>
+                        <ListItemText primary={`Profit So Far`} secondary={`${profitToken.toFixed(4)} ${bot.token.symbol}`} />
+                        <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />
+                      </ListItem>} */}
+                      <ListItem>
+                        <ListItemText primary="# Grids" secondary={bot.grids.toString()} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Lower Range" secondary={`$${bot.lowerRange.toString()}`} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Upper Range" secondary={`$${bot.upperRange.toString()}`} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Last execution" secondary={bot.lastExecution} />
+                      </ListItem>
+                    </List>
+                    <ButtonGroup fullWidth>
+                      {isRunning && <Button onClick={() => pause(bot.id)} startIcon={<Pause />} disabled={isDisabled}>
+                        Pause
+                      </Button>}
+                      {!isRunning && <Button onClick={() => resume(bot.id)} startIcon={<PlayArrow />} disabled={isDisabled}>
+                        Resume
+                      </Button>}
+                      <Button color="success" onClick={() => deposit(bot.token)} disabled={isDisabled} startIcon={<MonetizationOn />}>
+                        Deposit
+                      </Button>
+                      <Button color="error" onClick={() => deleteBot(bot.id)} disabled={isDisabled} startIcon={<Delete />}>
+                        Delete
+                      </Button>
+                    </ButtonGroup>
                   </Stack>
-                  <List aria-label="bot details">
-                    <ListItem>
-                      <ListItemText primary={`${bot.token.symbol} Amount`} secondary={bot.amount.toFixed(4)} />
-                      {bot.amount > 0 && (
-                        <Button color="success" startIcon={<Wallet />} onClick={() => {
-                          withdraw({ amount: bot.amount, token: bot.token });
-                        }} disabled={isDisabled}>
-                          Withdraw
-                        </Button>
-                      )}
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary={`${bot.tokenPair.symbol} Amount`} secondary={bot.amountPair.toFixed(4)} />
-                      {bot.amountPair > 0 && (
-                        <Button color="success" startIcon={<Wallet />} onClick={() => {
-                          withdraw({ amount: bot.amountPair, token: bot.tokenPair });
-                        }} disabled={isDisabled}>
-                          Withdraw
-                        </Button>
-                      )}
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested.toFixed(4)} ${bot.token.symbol}`} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary={`Total Balance`} secondary={`${totalAmount.toFixed(4)} ${bot.token.symbol}`} />
-                    </ListItem>
-                    {shouldShowProfit && <ListItem>
-                      <ListItemText primary={`Profit So Far`} secondary={`${profitToken.toFixed(4)} ${bot.token.symbol}`} />
-                      <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />
-                    </ListItem>}
-                    <ListItem>
-                      <ListItemText primary="# Grids" secondary={bot.grids.toString()} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Lower Range" secondary={`$${bot.lowerRange.toString()}`} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Upper Range" secondary={`$${bot.upperRange.toString()}`} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Last execution" secondary={bot.lastExecution} />
-                    </ListItem>
-                  </List>
-                  <ButtonGroup fullWidth>
-                    {isRunning && <Button onClick={() => pause(bot.id)} startIcon={<Pause />} disabled={isDisabled}>
-                      Pause
-                    </Button>}
-                    {!isRunning && <Button onClick={() => resume(bot.id)} startIcon={<PlayArrow />} disabled={isDisabled}>
-                      Resume
-                    </Button>}
-                    <Button color="success" onClick={() => deposit(bot.token)} disabled={isDisabled} startIcon={<MonetizationOn />}>
-                      Deposit
-                    </Button>
-                    <Button color="error" onClick={() => deleteBot(bot.id)} disabled={isDisabled} startIcon={<Delete />}>
-                      Delete
-                    </Button>
-                  </ButtonGroup>
-                </Stack>
-              </Card>
+                </Card>
+              </Box>
               <Stack sx={{width: '100%'}} spacing={2}>
-                <Stack direction="row" justifyContent="flex-end">
-                  <Button onClick={() => setIsGraphicOpen((current) => !current)} variant="outlined" color="primary" startIcon={<ShowChart />}>
-                    {isGraphicOpen ? 'Hide' : 'Show'} Real-Time Price Chart
-                  </Button>
-                </Stack>
                 {isGraphicOpen && graphicSymbol && MemoizedChart}
                 <EventList events={botEvents} refetch={refetch} />
               </Stack>

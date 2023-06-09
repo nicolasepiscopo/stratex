@@ -38,7 +38,10 @@ export default function Dashboard () {
         {!isLoading && (
           <>
             {shouldShowSwapBotWidget && (
-              <SwapBotWidget onCancel={bots.length ? () => setIsOpenSwapBotWidget(false) : undefined} />
+              <SwapBotWidget 
+                onCancel={bots.length ? () => setIsOpenSwapBotWidget(false) : undefined} 
+                onSuccess={() => setIsOpenSwapBotWidget(false)}
+              />
             )}
             {!shouldShowSwapBotWidget && !isSmallScreen && (
               <Stack direction="row" spacing={2} mt={3}>

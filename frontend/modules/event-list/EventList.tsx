@@ -11,17 +11,24 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import Card from "@mui/material/Card";
 import orderBy from "lodash/orderBy";
 import Refresh from "@mui/icons-material/Refresh";
 import { Event } from "./EventList.helpers";
 import { toast } from "react-toastify";
+import { SymbolCell } from "./symbol-cell";
+import { usePaginatedResults } from "../../hooks/usePaginatedResults";
+import { Pagination } from "../../components/Pagination";
 
 interface BotListProps {
   events: Event[];
   refetch: () => Promise<unknown>;
+  title?: string;
+  pageSize?: number;
 }
 
-export function EventList ({ events, refetch }: BotListProps) {
+export function EventList ({ events = [], refetch, title, pageSize = 10 }: BotListProps) {
+  const { paginatedResults, setPage, page, pageCount } = usePaginatedResults(orderBy(events, ['date'], ['desc']), { pageSize });
   const handleOnClick = () => {
     toast.promise(
       refetch(),
@@ -34,76 +41,77 @@ export function EventList ({ events, refetch }: BotListProps) {
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Box p={1} textAlign="center">
-        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
-          <Typography variant="overline">
-            Bots Transaction Events
+    <Card sx={{ width: '100%' }}>
+      <TableContainer component={Paper}>
+        <Box p={1} textAlign="center">
+          <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+            <Typography variant="overline">
+              {title ?? 'Bots Transaction Events'}
+            </Typography>
+            <Tooltip title="Refresh List">
+              <IconButton onClick={handleOnClick} size="small">
+                <Refresh fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </Box>
+        <Table aria-label="events-table">
+          <TableHead>
+            <TableRow>
+              <TableCell width={100} />
+              <TableCell>
+                Order Type
+              </TableCell>
+              <TableCell>
+                Qty
+              </TableCell>
+              <TableCell>
+                Trade Price
+              </TableCell>
+              <TableCell>
+                Date
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedResults.map((event, index) => {
+              return (
+                <TableRow key={index}>
+                  <TableCell align="center">
+                    <SymbolCell 
+                      botId={event.botId}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={event.orderType.toUpperCase()}
+                      color={event.orderType === 'buy' ? 'warning' : 'success'}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {event.quantity}
+                  </TableCell>
+                  <TableCell>
+                    ${event.tradePrice}
+                  </TableCell>
+                  <TableCell>
+                    {event.date}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+        <Pagination page={page} pageCount={pageCount} setPage={setPage} />
+      </TableContainer>
+      {events.length === 0 && (
+        <Box p={2} textAlign="center">
+          <Typography variant="overline" color="gray">
+            No events yet
           </Typography>
-          <Tooltip title="Refresh List">
-            <IconButton onClick={handleOnClick} size="small">
-              <Refresh fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      </Box>
-      <Table aria-label="events-table">
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              Symbol
-            </TableCell>
-            <TableCell>
-              Order Type
-            </TableCell>
-            <TableCell>
-              Qty
-            </TableCell>
-            <TableCell>
-              Trade Price
-            </TableCell>
-            <TableCell>
-              Date
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {orderBy(events, ['date'], ['desc']).map((event) => {
-            return (
-              <TableRow key={event.id}>
-                <TableCell>
-                  <Box
-                    aria-label={event.symbol}
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      backgroundImage: `url(${event.symbolImage})`,
-                      backgroundSize: 'cover',
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Chip 
-                    label={event.orderType.toUpperCase()}
-                    color={event.orderType === 'buy' ? 'warning' : 'success'}
-                    variant="outlined"
-                  />
-                </TableCell>
-                <TableCell>
-                  {event.quantity}
-                </TableCell>
-                <TableCell>
-                  ${event.tradePrice}
-                </TableCell>
-                <TableCell>
-                  {event.date}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </Box>
+      )}
+    </Card>
   );
 }

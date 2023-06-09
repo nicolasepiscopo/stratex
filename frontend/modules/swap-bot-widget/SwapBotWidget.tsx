@@ -21,12 +21,13 @@ import { formatEther, parseEther } from "@ethersproject/units";
 
 interface SwapBotWidgetProps {
   onCancel?: () => void;
+  onSuccess?: () => void;
 }
 
-export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
+export function SwapBotWidget ({ onCancel, onSuccess }: SwapBotWidgetProps) {
   const { account, chainId } = useWeb3React<Web3Provider>();
   const tokens = useTokenList(chainId);
-  const defaultToken = tokens.find(token => token.symbol === 'WMATIC'); 
+  const defaultToken = tokens.find(token => token.symbol === 'WMATIC');
   const [selectedToken, setSelectedToken] = useState<Token>();
   const balanceData = useBalance(account, selectedToken?.address);
   const [selectedTokenModalOpen, setSelectedTokenModalOpen] = useState<boolean>(false);
@@ -45,8 +46,8 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
     price: selectedTargetTokenPrice,
     isLoading: selectedTargetTokenPriceLoading,
   } = useTokenPrice(selectedTargetToken);
-  const createBot = useCreateBot({
-    onSuccess: onCancel,
+  const { createBot, isLoading: isCreatingBot } = useCreateBot({
+    onSuccess,
   });
 
   const selectedTokenImg = selectedToken?.logoURI;
@@ -56,7 +57,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
   const targetCoinsQty = (Number(amount)/selectedTargetTokenPrice).toFixed(6);
   const insufficientBalance = balanceData && parseEther(`0${amountToSwap}`).gt(balanceData);
   const isSameToken = selectedToken?.address === selectedTargetToken?.address;
-  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance && !isSameToken;
+  const isSubmitEnabled = !!selectedTargetToken && !isEmptyOrZero(amountToSwap) && !!lowerRange && !!upperRange && !insufficientBalance && !isSameToken && !isCreatingBot;
 
   const isLoading = !selectedToken;
 
@@ -85,6 +86,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
         lowerRange: lowerRange ? Number(lowerRange) : 0,
         upperRange: upperRange ? Number(upperRange) : 0,
         tokenIn: selectedToken.address,
+        tokenOut: selectedTargetToken?.address,
       });
     } catch (error) {
       console.error(error);
@@ -124,7 +126,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
           <Stack direction="row" justifyContent="space-between">
             {selectedTokenPriceLoading ? 
               <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />
-            : <Typography variant="caption">{!!amount && `$${amount}`}</Typography>}
+            : <Typography variant="caption">{!!amount && `$${amount.toFixed(4)}`}</Typography>}
             {balanceData ? <Typography variant="caption" sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {!balanceData.isZero() ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography> : <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />}
           </Stack>
           {selectedTargetToken && 
@@ -195,6 +197,7 @@ export function SwapBotWidget ({ onCancel }: SwapBotWidgetProps) {
             {insufficientBalance && 'Insufficient Balance'}
             {isSameToken && 'Select Different Token'}
             {isSubmitEnabled && 'Create Bot Now'}
+            {isCreatingBot && 'Creating Bot'}
           </Button>}
         </Stack>
         <TokenSelectorModal 

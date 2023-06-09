@@ -22,38 +22,44 @@ const abi = [
       },
       {
         "indexed": false,
-        "internalType": "enum StratEx.OrderType",
-        "name": "ordertype",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
-        "name": "gridIndex",
+        "name": "upper_range",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "qty",
+        "name": "lower_range",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "price",
+        "name": "no_of_grids",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "timestamp",
+        "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "tokenIn",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "tokenOut",
+        "type": "address"
       }
     ],
-    "name": "OrderExecuted",
+    "name": "NewBot",
     "type": "event"
-  },
+  }
 ]
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -68,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     address,
     fromBlock: 0,
     toBlock: 'latest',
-    topics: [id('OrderExecuted(address,uint256,uint8,uint256,uint256,uint256,uint256)'), defaultAbiCoder.encode(["address"], [userAddress])]
+    topics: [id('NewBot(address,uint256,uint256,uint256,uint256,uint256,address,address)'), defaultAbiCoder.encode(["address"], [userAddress])]
   });
   const i = new Interface(abi);
 
@@ -78,12 +84,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return {
         botId: logData.args[1].toString(),
-        orderType: logData.args[2] === 0 ? 'buy' : 'sell',
-        gridIndex: logData.args[3].toString(),
-        qty: logData.args[4].toString(),
-        price: logData.args[5].toString(),
-        timestamp: logData.args[6].toString(),
-      }
+        amount: logData.args[5].toString(),
+      };
     } catch (e) {
       return null;
     }

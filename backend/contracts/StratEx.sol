@@ -51,14 +51,16 @@ contract StratEx is AutomationCompatibleInterface {
     enum OrderType {
         BuyOrder, 
         SellOrder,
-        UpdateCurrentGrid    
+        UpdateCurrentGrid,
+        ByPass    
     }
+
     struct PerformData {
         uint256 botId;
         uint256 breachIndex;
         OrderType orderType;
     }
- 
+
     // Bot ID => breachIndex => isbreached
     mapping(uint256 => mapping(uint256 => bool)) public breachedBotGrids;
     // Bot ID => breachIndex => amount buy ordered
@@ -120,49 +122,56 @@ contract StratEx is AutomationCompatibleInterface {
         // Add grid below lower range (0) and upper range (grids.length + 1)
         for (uint256 i = 0; i < grids.length; i++) {
             if (i == 0 && _currentPrice < grids[i]) return i;
-            if (i == (grids.length - 1) && _currentPrice > grids[i]) return (i + 1);
+            if (i == (grids.length - 1) && _currentPrice >= grids[i]) return (i + 1);
             if (_currentPrice >= grids[i] && _currentPrice < grids[i + 1]) return (i + 1);
         }
     }
 
-    function checkOrderExecution(uint256 _counter, uint256 _newGrid, uint256 _currentGrid) internal view returns (bool _upkeepNeeded, OrderType _ordertype) {
-        if ((_newGrid < _currentGrid) && !breachedBotGrids[_counter][_currentGrid-1]){
+    function checkOrderExecution(uint256 _botId, uint256 _newGrid, uint256 _currentGrid) internal view returns (bool _upkeepNeeded, OrderType _ordertype, uint256 _buyGrid) {
+        if ((_newGrid < _currentGrid) && !breachedBotGrids[_botId][_currentGrid-1]){
             _ordertype =OrderType.BuyOrder;
             _upkeepNeeded = true;
-        }else if ((_newGrid > _currentGrid) && (_newGrid > 1) && breachedBotGrids[_counter][_newGrid-2]){
-            _ordertype = OrderType.SellOrder;
-            _upkeepNeeded = true; 
-        } else {
-            if (_newGrid != _currentGrid) {
-                _ordertype = OrderType.UpdateCurrentGrid;
-                _upkeepNeeded = true;
+        }else if ((_newGrid > _currentGrid) && (_newGrid > 1)) {
+            // find minimun order placed to get the maximum profit
+            bool hasBuyOrderPlaced; 
+            for (uint256 i = 0; i < bots[_botId].grids.length; i++) {
+                if (breachedBotGrids[_botId][i] && _newGrid > i) {
+                    _buyGrid = i;
+                    hasBuyOrderPlaced = true;
+                    break;
+                }
+            }
+            if (hasBuyOrderPlaced) {
+                _ordertype = OrderType.SellOrder;
+                _upkeepNeeded = true; 
             }
         }
-        return (_upkeepNeeded, _ordertype);
+        if (!_upkeepNeeded && _newGrid != _currentGrid) {
+            _ordertype = OrderType.UpdateCurrentGrid;
+            _upkeepNeeded = true;
+        }
     }
 
     function checkUpkeep(bytes calldata /* checkData */) external view override returns (bool upkeepNeeded, bytes memory performData)
     {
         PerformData[] memory performDataUnencoded = new PerformData[](botCounter); // for each botId related the PerfomData
-        upkeepNeeded = false;
-
-        // for testing only
-        /* (uint256 price) = abi.decode(
-            checkData,
-            (uint256)
-        );*/
-        // end testing
 
         uint256 price = getScaledPrice();
+
+        bool hasAlmostOneBotToExecute;
         for (uint256 i = 0; i < botCounter; i++) {
             if (bots[i].upper_range == 0 || bots[i].isCancelled) continue; // bots[] can be deleted so to avoid processing empty voids we put this control
             uint256 newGrid = calculateGrid(bots[i].grids, price);
             OrderType ordertype;
-            (upkeepNeeded, ordertype) = checkOrderExecution(i, newGrid, bots[i].currentGrid);
-            if (upkeepNeeded) performDataUnencoded[i] = PerformData(i, newGrid, ordertype);
+            (upkeepNeeded, ordertype, ) = checkOrderExecution(i, newGrid, bots[i].currentGrid);
+            if (upkeepNeeded) {
+                performDataUnencoded[i] = PerformData(i, newGrid, ordertype);
+                hasAlmostOneBotToExecute = true;
+            } else {
+                performDataUnencoded[i] = PerformData(0, 0, OrderType.ByPass);
+            }
         }
-        if (upkeepNeeded) performData = abi.encode(performDataUnencoded);
-        // for testing only => if (upkeepNeeded) performData = abi.encode(performDataUnencoded, price);
+        if (hasAlmostOneBotToExecute) performData = abi.encode(performDataUnencoded);
         return (upkeepNeeded, performData); 
     }
 
@@ -170,68 +179,61 @@ contract StratEx is AutomationCompatibleInterface {
         uint256 price = getScaledPrice();
         
         PerformData[] memory performDataDecoded = abi.decode(performData, (PerformData[]));
-        // for testing only
-        /* PerformData[] memory performDataDecoded;
-        uint256 price;
-        (performDataDecoded, price) = abi.decode(performData, (PerformData[], uint256)); */
 
-        // end testing
         for (uint256 i = 0; i < performDataDecoded.length; i++) {
             PerformData memory performDataIndividual = performDataDecoded[i];
+            if (performDataIndividual.orderType == OrderType.ByPass) continue;
             // if number of grid are 5, it means that we could have grids from 0 to 6
-            uint256 breachIndex = performDataIndividual.breachIndex; 
             Bot storage bot = bots[performDataIndividual.botId];
-            
+            if (bots[i].upper_range == 0 && bot.isCancelled) continue;
             // check again if the order should be executed. To avoid malicious external requests
             OrderType checkedOrdertype;
             uint256 checkedNewGrid = calculateGrid(bot.grids, price);
             bool botNeedExecution;
-            (botNeedExecution, checkedOrdertype) = checkOrderExecution(performDataIndividual.botId, checkedNewGrid, bot.currentGrid);
-            require(botNeedExecution, "Order should not be executed");
+            uint256 buyGrid;
+            (botNeedExecution, checkedOrdertype, buyGrid) = checkOrderExecution(performDataIndividual.botId, checkedNewGrid, bot.currentGrid);
+            if (!botNeedExecution) continue;
 
             uint256 amountToSwap;
             if(checkedOrdertype == OrderType.BuyOrder) {
-                // BUY
                 amountToSwap = (balances[performDataIndividual.botId][bot.tokenIn] * balanceToSpentBPS) / 10000;
                 // autocancel bot
                 if (amountToSwap < minimunAmountAllowed) {
                     bot.isCancelled = true;
                     continue;
                 }
-                executeOrder(checkedOrdertype, performDataIndividual.botId, amountToSwap, bot, breachIndex, price);
+                executeOrder(checkedOrdertype, performDataIndividual.botId, amountToSwap, performDataIndividual.breachIndex, checkedNewGrid, price);
             }
             if(checkedOrdertype == OrderType.SellOrder) {
-                // ToDo => if price goes down multiple grids, multiple sells need to be placed
-                // SELL
-                amountToSwap = boughtBotAmounts[performDataIndividual.botId][breachIndex - 2];
-                executeOrder(checkedOrdertype, performDataIndividual.botId, amountToSwap, bot, breachIndex, price);   
+                amountToSwap = boughtBotAmounts[performDataIndividual.botId][buyGrid];
+                executeOrder(checkedOrdertype, performDataIndividual.botId, amountToSwap, buyGrid, checkedNewGrid, price);   
             }
             if (checkedOrdertype == OrderType.UpdateCurrentGrid) {
-                bot.currentGrid = breachIndex;
+                bot.currentGrid = performDataIndividual.breachIndex;
             }
             bot.lastExecutionTime = block.timestamp;
         }
     }
 
-    function executeOrder(OrderType _ordertype, uint256 _botId, uint256 _amountToSwap, Bot storage bot, uint256 _breachIndex, uint256 _price) internal {
+    function executeOrder(OrderType _ordertype, uint256 _botId, uint256 _amountToSwap, uint256 _breachIndex, uint256 _newGrid, uint256 _price) internal {
         if (_ordertype == OrderType.BuyOrder) {
-            uint256 qty = swapExactInputSingle(_amountToSwap, bot.tokenIn, bot.tokenOut);
-            balances[_botId][bot.tokenIn] -= _amountToSwap;
-            balances[_botId][bot.tokenOut] += qty;
-            bot.buyCounter++;
+            uint256 qty = swapExactInputSingle(_amountToSwap, bots[_botId].tokenIn, bots[_botId].tokenOut);
+            balances[_botId][bots[_botId].tokenIn] -= _amountToSwap;
+            balances[_botId][bots[_botId].tokenOut] += qty;
+            bots[_botId].buyCounter++;
             breachedBotGrids[_botId][_breachIndex] = true;
             boughtBotAmounts[_botId][_breachIndex] = qty; // store WETH that bot has gathered as a profit swap
-            bot.currentGrid = _breachIndex;
-            emit OrderExecuted(bot.user, _botId, _ordertype, _breachIndex, qty, _price, block.timestamp);
+            bots[_botId].currentGrid = _breachIndex;
+            emit OrderExecuted(bots[_botId].user, _botId, _ordertype, _breachIndex, qty, _price, block.timestamp);
         } else if(_ordertype == OrderType.SellOrder) {
-            uint256 qty = swapExactInputSingle(_amountToSwap, bot.tokenOut, bot.tokenIn);
-            balances[_botId][bot.tokenIn] += qty;
-            balances[_botId][bot.tokenOut] -= _amountToSwap;
-            bot.sellCounter++;
-            delete breachedBotGrids[_botId][_breachIndex - 2];
-            delete boughtBotAmounts[_botId][_breachIndex - 2];
-            bot.currentGrid = _breachIndex;
-            emit OrderExecuted(bot.user, _botId, _ordertype, _breachIndex, qty, _price, block.timestamp);
+            uint256 qty = swapExactInputSingle(_amountToSwap, bots[_botId].tokenOut, bots[_botId].tokenIn);
+            balances[_botId][bots[_botId].tokenIn] += qty;
+            balances[_botId][bots[_botId].tokenOut] -= _amountToSwap;
+            bots[_botId].sellCounter++;
+            delete breachedBotGrids[_botId][_breachIndex];
+            delete boughtBotAmounts[_botId][_breachIndex];
+            bots[_botId].currentGrid = _newGrid;
+            emit OrderExecuted(bots[_botId].user, _botId, _ordertype, _breachIndex, qty, _price, block.timestamp);
         }
     }
 
@@ -265,25 +267,25 @@ contract StratEx is AutomationCompatibleInterface {
         }
     }
 
-    function getDecimals() public view returns (uint8) {
+    function getDecimals() internal view returns (uint8) {
         return priceFeed.decimals();
     }
 
     function getOraclePrice() public view returns (int) {
         (
             /* uint80 roundID */,
-            int price,
+            int _price,
             /*uint startedAt*/,
             /*uint timeStamp*/,
             /*uint80 answeredInRound*/
         ) = priceFeed.latestRoundData();
-        return price;
+        return _price;
     }
 
     function getScaledPrice() internal view returns (uint256) {
-        int price = getOraclePrice();
+        int _price = getOraclePrice();
         uint8 decimals = getDecimals();
-        uint256 convertedPrice = uint256(price) / (10**uint256(decimals));
+        uint256 convertedPrice = uint256(_price) / (10**uint256(decimals));
         return convertedPrice;
     }
 

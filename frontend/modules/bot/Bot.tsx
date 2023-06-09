@@ -29,6 +29,7 @@ import { useDepositsAmount, useInitialAmount } from "./Bot.helpers";
 import { useMemo } from "react";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import { BasicTabs } from "../../components/BasicTabs";
+import { useTokenPrice } from "../../hooks/useTokenPrice";
 
 export default function Bot () {
   const router = useRouter();
@@ -44,17 +45,16 @@ export default function Bot () {
   const botEvents = events?.filter((event) => event.botId === botId) ?? [];
   const isRunning = bot?.status === 'running';
   const isDisabled = isResuming || isPausing || isDeleting || isDepositing || isWithdrawing;
-  // const { price: tokenPrice } = useTokenPrice(bot?.token);
-  // const { price: tokenPairPrice } = useTokenPrice(bot?.tokenPair);
+  const { price: tokenPrice } = useTokenPrice(bot?.token);
+  const { price: tokenPairPrice } = useTokenPrice(bot?.tokenPair);
   // const { quote: tokenPairPriceToTokenIn } = useQuote({ tokenIn: bot?.tokenPair, tokenOut: bot?.token, amount: bot?.amountPair });
   const initialAmount = useInitialAmount(bot?.id);
   const depositsAmount = useDepositsAmount(bot?.id);
   const totalInvested = initialAmount + depositsAmount;
-  // const totalAmount = bot ? bot.amount + tokenPairPriceToTokenIn : 0;
-  // const totalAmountUSD = bot ? tokenPrice * bot.amount + tokenPairPrice * bot.amountPair : 0;
-  // const profitToken = totalAmount - totalInvested;
-  // const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair > 0;
-  // const percentage = ((profitToken*100)/totalInvested).toFixed(2);
+  const totalAmount = bot ? bot.amount : 0;
+  const profitToken = totalAmount - totalInvested;
+  const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair === 0;
+  const percentage = ((profitToken*100)/totalInvested).toFixed(2);
   const graphicSymbol = bot?.tokenPair.symbol.at(0) === 'W' ? bot?.tokenPair.symbol.slice(1) : bot?.tokenPair.symbol;
   const MemoizedChart = useMemo(() => (
     <AdvancedRealTimeChart 
@@ -134,10 +134,7 @@ export default function Bot () {
                         )}
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested.toFixed(4)} ${bot.token.symbol}`} />
-                      </ListItem>
-                      {/* <ListItem>
-                        <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
+                        <ListItemText primary={`Total Invested`} secondary={`${totalInvested.toFixed(4)} ${bot.token.symbol}`} />
                       </ListItem>
                       <ListItem>
                         <ListItemText primary={`Total Balance`} secondary={`${totalAmount.toFixed(4)} ${bot.token.symbol}`} />
@@ -145,7 +142,7 @@ export default function Bot () {
                       {shouldShowProfit && <ListItem>
                         <ListItemText primary={`Profit So Far`} secondary={`${profitToken.toFixed(4)} ${bot.token.symbol}`} />
                         <Chip color={profitToken < 0 ? 'error' : 'success'} label={`${profitToken < 0 ? '' : '+'}${percentage}%`} />
-                      </ListItem>} */}
+                      </ListItem>}
                       <ListItem>
                         <ListItemText primary="# Grids" secondary={bot.grids.toString()} />
                       </ListItem>

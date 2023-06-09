@@ -27,7 +27,7 @@ interface BotListProps {
   pageSize?: number;
 }
 
-export function EventList ({ events, refetch, title, pageSize = 10 }: BotListProps) {
+export function EventList ({ events = [], refetch, title, pageSize = 10 }: BotListProps) {
   const { paginatedResults, setPage, page, pageCount } = usePaginatedResults(orderBy(events, ['date'], ['desc']), { pageSize });
   const handleOnClick = () => {
     toast.promise(

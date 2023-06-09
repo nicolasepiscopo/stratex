@@ -126,7 +126,7 @@ export function SwapBotWidget ({ onCancel, onSuccess }: SwapBotWidgetProps) {
           <Stack direction="row" justifyContent="space-between">
             {selectedTokenPriceLoading ? 
               <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />
-            : <Typography variant="caption">{!!amount && `$${amount}`}</Typography>}
+            : <Typography variant="caption">{!!amount && `$${amount.toFixed(4)}`}</Typography>}
             {balanceData ? <Typography variant="caption" sx={{ cursor: 'pointer' }} role="button" onClick={() => setAmountToSwap(balance.toString())}>Balance: {!balanceData.isZero() ? '~' : ''}{`${balance}`.slice(0, 6)} {selectedToken.symbol}</Typography> : <Skeleton variant="text" sx={{ fontSize: '1rem', width: '5rem' }} />}
           </Stack>
           {selectedTargetToken && 

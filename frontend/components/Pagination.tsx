@@ -10,6 +10,8 @@ interface PaginationProps {
 }
 
 export function Pagination ({ pageCount, page, setPage }: PaginationProps) {
+  if (pageCount === 1) return null;
+
   return (
     <Stack direction="row" justifyContent="space-between" p={1} spacing={1}>
       <Button onClick={() => setPage(page - 1)} startIcon={<ArrowBack />} disabled={page <= 0}>

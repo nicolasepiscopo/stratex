@@ -168,7 +168,7 @@ export default function Bot () {
                     content: <EventList title="Transaction Events" events={botEvents} refetch={refetch} pageSize={5} />
                   },
                   ...graphicSymbol && [{
-                    label: `Live ${bot.tokenPair.symbol} Price`,
+                    label: `Live ${graphicSymbol} Price`,
                     content: MemoizedChart
                   }]
                 ]}

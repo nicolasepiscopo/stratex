@@ -25,10 +25,11 @@ import Pause from "@mui/icons-material/Pause";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import Wallet from "@mui/icons-material/Wallet";
 // import { useTokenPrice } from "../../hooks/useTokenPrice";
-import { useDepositsAmount, useInitialAmount, useQuote } from "./Bot.helpers";
+import { useDepositsAmount, useInitialAmount } from "./Bot.helpers";
 import { useMemo, useState } from "react";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import ShowChart from "@mui/icons-material/ShowChart";
+import { BasicTabs } from "../../components/BasicTabs";
 
 export default function Bot () {
   const router = useRouter();
@@ -37,7 +38,6 @@ export default function Bot () {
   const { deleteBot, isLoading: isDeleting } = useDeleteBot();
   const { pause, isLoading: isPausing } = usePauseBot();
   const { resume, isLoading: isResuming } = useResumeBot();
-  const [isGraphicOpen, setIsGraphicOpen] = useState(false);
   const { deposit, isLoading: isDepositing } = useDeposit(botId as string);
   const { withdraw, isLoading: isWithdrawing } = useWithdraw(botId as string);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'));
@@ -60,7 +60,8 @@ export default function Bot () {
   const MemoizedChart = useMemo(() => (
     <AdvancedRealTimeChart 
       theme="dark" 
-      autosize 
+      width="100%"
+      height="500" 
       symbol={`BITSTAMP:${graphicSymbol}USD`} 
       hide_top_toolbar
       hide_legend
@@ -85,12 +86,9 @@ export default function Bot () {
         )}
         {!isLoading && bot && (
           <Box pt={4}>
-            <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" justifyContent="space-between" sx={{ position: 'relative' }}>
               <Button onClick={() => router.back()} startIcon={<ArrowBack />} color="inherit">
                 My Bots
-              </Button>
-              <Button onClick={() => setIsGraphicOpen((current) => !current)} variant="outlined" color="primary" startIcon={<ShowChart />}>
-                {isGraphicOpen ? 'Hide' : 'Show'} Real-Time Price Chart
               </Button>
             </Stack>
             <Stack direction={!isSmallScreen ? "row" : "column"} spacing={2} mt={3}>
@@ -179,10 +177,19 @@ export default function Bot () {
                   </Stack>
                 </Card>
               </Box>
-              <Stack sx={{width: '100%'}} spacing={2}>
-                {isGraphicOpen && graphicSymbol && MemoizedChart}
-                <EventList events={botEvents} refetch={refetch} />
-              </Stack>
+              <BasicTabs 
+                tabs={[
+                  {
+                    label: `Transactions ${botEvents.length ? `(${botEvents.length})` : ''}`,
+                    content: <EventList title="Transaction Events" events={botEvents} refetch={refetch} />
+                  },
+                  ...graphicSymbol && [{
+                    label: `Live ${bot.tokenPair.symbol} Price`,
+                    content: MemoizedChart
+                  }]
+                ]}
+              />
+              
             </Stack>
           </Box>
         )}

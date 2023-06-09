@@ -1,6 +1,7 @@
-import { formatEther } from "@ethersproject/units";
+import { formatEther, parseEther, parseUnits } from "@ethersproject/units";
 import { useQuery } from "@tanstack/react-query";
 import { useWeb3React } from "@web3-react/core";
+import { Token } from "../token-selector-modal/TokenSelectorModal.helpers";
 
 interface ContractEvent {
   botId: string;
@@ -74,4 +75,32 @@ export function useDepositsAmount(botId: string | undefined) {
   const { amounts } = useDeposits();
 
   return amounts.filter(amount => amount.botId === botId).reduce((acc, amount) => acc + amount.amount, 0);
+}
+
+interface UseQuoteParams {
+  tokenIn: Token | undefined;
+  tokenOut: Token | undefined;
+  amount: number;
+}
+
+export function useQuote({ tokenIn, tokenOut, amount }: UseQuoteParams) {
+  const { library } = useWeb3React();
+  const { data, isLoading } = useQuery({
+    enabled: !!tokenIn && !!tokenOut,
+    queryKey: ['quote'],
+    queryFn: async () => {
+      const formattedAmount = parseEther(amount.toString());
+      const data = await fetch(`https://api.uniswap.org/v1/quote?protocols=v2%2Cv3%2Cmixed&tokenInAddress=${tokenIn.address}&tokenInChainId=${tokenIn.chainId}&tokenOutAddress=${tokenOut.address}&tokenOutChainId=${tokenOut.chainId}&amount=${formattedAmount}&type=exactIn`)
+      const { quoteDecimals } = await data.json();
+
+      return parseFloat(quoteDecimals);
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
+  return {
+    quote: data, isLoading
+  } as const;
 }

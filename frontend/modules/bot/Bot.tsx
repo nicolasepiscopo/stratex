@@ -25,7 +25,7 @@ import Pause from "@mui/icons-material/Pause";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import Wallet from "@mui/icons-material/Wallet";
 import { useTokenPrice } from "../../hooks/useTokenPrice";
-import { useDepositsAmount, useInitialAmount } from "./Bot.helpers";
+import { useDepositsAmount, useInitialAmount, useQuote } from "./Bot.helpers";
 import { useMemo, useState } from "react";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import ShowChart from "@mui/icons-material/ShowChart";
@@ -47,11 +47,15 @@ export default function Bot () {
   const isDisabled = isResuming || isPausing || isDeleting || isDepositing || isWithdrawing;
   const { price: tokenPrice } = useTokenPrice(bot?.token);
   const { price: tokenPairPrice } = useTokenPrice(bot?.tokenPair);
-  const { price: tokenPairPriceToTokenIn } = useTokenPrice(bot?.tokenPair, bot?.token);
+  const { quote: tokenPairPriceToTokenIn } = useQuote({ tokenIn: bot?.tokenPair, tokenOut: bot?.token, amount: bot?.amountPair });
   const initialAmount = useInitialAmount(bot?.id);
   const depositsAmount = useDepositsAmount(bot?.id);
   const totalInvested = initialAmount + depositsAmount;
-  const totalAmount = bot ? bot.amount + (tokenPairPriceToTokenIn * bot.amountPair) : 0;
+  const totalAmount = bot ? bot.amount + tokenPairPriceToTokenIn : 0;
+  console.log({
+    totalAmount,
+    tokenPairPriceToTokenIn
+  })
   const totalAmountUSD = bot ? tokenPrice * bot.amount + tokenPairPrice * bot.amountPair : 0;
   const profitToken = totalAmount - totalInvested;
   const shouldShowProfit = profitToken !== 0 && totalInvested > 0 && totalAmount > 0 && bot.amount > 0 && bot.amountPair > 0;

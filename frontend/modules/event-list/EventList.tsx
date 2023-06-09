@@ -17,14 +17,18 @@ import Refresh from "@mui/icons-material/Refresh";
 import { Event } from "./EventList.helpers";
 import { toast } from "react-toastify";
 import { SymbolCell } from "./symbol-cell";
+import { usePaginatedResults } from "../../hooks/usePaginatedResults";
+import { Pagination } from "../../components/Pagination";
 
 interface BotListProps {
   events: Event[];
   refetch: () => Promise<unknown>;
   title?: string;
+  pageSize?: number;
 }
 
-export function EventList ({ events, refetch, title }: BotListProps) {
+export function EventList ({ events, refetch, title, pageSize = 10 }: BotListProps) {
+  const { paginatedResults, setPage, page, pageCount } = usePaginatedResults(orderBy(events, ['date'], ['desc']), { pageSize });
   const handleOnClick = () => {
     toast.promise(
       refetch(),
@@ -70,7 +74,7 @@ export function EventList ({ events, refetch, title }: BotListProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {orderBy(events, ['date'], ['desc']).map((event, index) => {
+            {paginatedResults.map((event, index) => {
               return (
                 <TableRow key={index}>
                   <TableCell align="center">
@@ -99,6 +103,7 @@ export function EventList ({ events, refetch, title }: BotListProps) {
             })}
           </TableBody>
         </Table>
+        <Pagination page={page} pageCount={pageCount} setPage={setPage} />
       </TableContainer>
       {events.length === 0 && (
         <Box p={2} textAlign="center">

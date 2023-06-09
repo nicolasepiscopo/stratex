@@ -2,6 +2,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { formatEther } from "@ethersproject/units";
 import { useQuery } from "@tanstack/react-query";
 import { useWeb3React } from "@web3-react/core";
+import { useState } from "react";
 
 interface ContractEvent {
   botId: string;

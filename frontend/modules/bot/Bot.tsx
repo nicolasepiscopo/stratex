@@ -133,11 +133,11 @@ export default function Bot () {
                           </Button>
                         )}
                       </ListItem>
-                      {/* <ListItem>
-                        <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
-                      </ListItem>
                       <ListItem>
                         <ListItemText primary={`Total Amount Invested`} secondary={`${totalInvested.toFixed(4)} ${bot.token.symbol}`} />
+                      </ListItem>
+                      {/* <ListItem>
+                        <ListItemText primary="Total Amount Invested (USD)" secondary={`$${(totalAmountUSD).toFixed(3)}`} />
                       </ListItem>
                       <ListItem>
                         <ListItemText primary={`Total Balance`} secondary={`${totalAmount.toFixed(4)} ${bot.token.symbol}`} />
@@ -180,7 +180,7 @@ export default function Bot () {
                 tabs={[
                   {
                     label: `Transactions ${botEvents.length ? `(${botEvents.length})` : ''}`,
-                    content: <EventList title="Transaction Events" events={botEvents} refetch={refetch} />
+                    content: <EventList title="Transaction Events" events={botEvents} refetch={refetch} pageSize={5} />
                   },
                   ...graphicSymbol && [{
                     label: `Live ${bot.tokenPair.symbol} Price`,

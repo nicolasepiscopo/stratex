@@ -110,7 +110,7 @@ export default function Bot () {
                     <List aria-label="bot details">
                       <ListItem>
                         <ListItemText primary={`${bot.token.symbol} Amount`} secondary={bot.amount.toFixed(4)} />
-                        {bot.amount > 0 && (
+                        {bot.amount > 0 && bot.amountPair === 0 && (
                           <Button color="success" startIcon={<Wallet />} onClick={() => {
                             withdraw({ amount: bot.amount, token: bot.token });
                           }} disabled={isDisabled}>
@@ -120,13 +120,6 @@ export default function Bot () {
                       </ListItem>
                       <ListItem>
                         <ListItemText primary={`${bot.tokenPair.symbol} Amount`} secondary={bot.amountPair.toFixed(4)} />
-                        {bot.amountPair > 0 && (
-                          <Button color="success" startIcon={<Wallet />} onClick={() => {
-                            withdraw({ amount: bot.amountPair, token: bot.tokenPair });
-                          }} disabled={isDisabled}>
-                            Withdraw
-                          </Button>
-                        )}
                       </ListItem>
                       <ListItem>
                         <ListItemText primary={`Total Invested`} secondary={`${totalInvested.toFixed(4)} ${bot.token.symbol}`} />

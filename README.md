@@ -2,7 +2,7 @@
   <img src="docs/logo_transp_bg.png" alt="StratEx" style="width: 500px">
 </p>
 
-# Stratex
+# StratEx
 Automated decentralized bot that leverages Chainlink services and Uniswap to execute optimized buy and sell operations, enabling users to trade efficiently and seek profits within specified ranges.
 
 ## User Benefits
@@ -24,9 +24,9 @@ We dedicated significant effort to develop the initial prototype, which is the S
 Once we successfully achieved the first version, we proceeded to the next step, which involved building a prototype capable of supporting multiple users and multiple bots. As a result, we were able to complete this alpha implementation, and you can find it here:
 
 - Try it out: https://main--wonderful-stroopwafel-b179a1.netlify.app/
-- Bot address: https://mumbai.polygonscan.com/address/0xc1068508bae3721016745db9000240f60bf59ab0
+- Bot address: https://mumbai.polygonscan.com/address/0x37243f07450E93aB8A3dd092161D49a73912c460
 - github: https://github.com/nicolasepiscopo/stratex
-- Chainlink UpKeep: https://automation.chain.link/mumbai/49731425686354808993613655674146670068471707538328680082346472121761589595239
+- Chainlink UpKeep: https://automation.chain.link/mumbai/46475617903902432885134145935749773380512962600107465695944426695203729482897
 
 We are aware that there are numerous improvements planned for our project following this hackathon, and we have mentioned some of them in our future plans section [later](#what's-next-for-stratex).
 

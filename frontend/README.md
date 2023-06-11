@@ -40,21 +40,4 @@ npm run dev
 
 As of now production environment is a deployment of latest `main` branch. 
 
-⚠️ ***It is limited to the usage of a single Bot.***
-
 https://main--wonderful-stroopwafel-b179a1.netlify.app/
-
-## Development environment
-
-As of now development environment is a deployment of `multipleBots1User` branch.
-
-https://deploy-preview-7--wonderful-stroopwafel-b179a1.netlify.app/
-
-This version comes with the support of some new beta features like:
-
-- Multiple users.
-- Multiple bots per user.
-- Pause / Resume Bots.
-- Watch tx event log for single Bot.
-- Withdraw balances from Bots.
-- Delete a Bot.

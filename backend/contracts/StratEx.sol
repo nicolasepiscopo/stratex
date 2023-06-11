@@ -128,14 +128,14 @@ contract StratEx is AutomationCompatibleInterface {
     }
 
     function checkOrderExecution(uint256 _botId, uint256 _newGrid, uint256 _currentGrid) internal view returns (bool _upkeepNeeded, OrderType _ordertype, uint256 _buyGrid) {
-        if ((_newGrid < _currentGrid) && !breachedBotGrids[_botId][_currentGrid-1]){
-            _ordertype =OrderType.BuyOrder;
+        if ((_newGrid < _currentGrid) && !breachedBotGrids[_botId][_newGrid]){
+            _ordertype = OrderType.BuyOrder;
             _upkeepNeeded = true;
         }else if ((_newGrid > _currentGrid) && (_newGrid > 1)) {
             // find minimun order placed to get the maximum profit
             bool hasBuyOrderPlaced; 
             for (uint256 i = 0; i < bots[_botId].grids.length; i++) {
-                if (breachedBotGrids[_botId][i] && _newGrid > i) {
+                if (breachedBotGrids[_botId][i] && _newGrid > (i + 1)) {
                     _buyGrid = i;
                     hasBuyOrderPlaced = true;
                     break;
